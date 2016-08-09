@@ -2,12 +2,12 @@
 
 'use strict';
 
-import * as ease from './../../_easings';
-import * as assets from './../../_assets';
-import * as animationUtils from './../../_animationUtils';
-import * as geometryUtils from './../../_geometryUtils';
-import * as colorUtils from './../../_colorUtils';
-import canvasUtils from './../_canvasUtils';
+import * as ease from './../../../_easings';
+import * as assets from './../../../_assets';
+import * as animationUtils from './../../../_animationUtils';
+import * as geometryUtils from './../../../_geometryUtils';
+import * as colorUtils from './../../../_colorUtils';
+import canvasUtils from './../../_canvasUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
@@ -19,13 +19,13 @@ export default class ChromeStep {
 
     this.canvasUtils = new canvasUtils(imageElement, canvas, context);
 
-    this.logoTop = 40;
+    this.logoTop = 35;
     this.logoLeft = 40;
-    this.logoWidth = 348 * (110 / 348);
-    this.logoHeight = 136 * (110 / 348);
+    this.logoWidth = 115;
+    this.logoHeight = 39;
 
     this.logo = new Image();
-    this.logo.src = assets.logoSrc;
+    this.logo.src = assets.googleLogoSrc;
 
     this.chrome(duration);
   }
@@ -63,15 +63,10 @@ export default class ChromeStep {
                 tick++;
               }
             });
-            this.context.globalCompositeOperation = 'overlay';
-            this.context.drawImage(this.logo, this.logoLeft, this.logoTop, single? this.logoWidth * 1.5 : this.logoWidth, single ? this.logoHeight * 1.5 : this.logoHeight);
-            this.context.globalCompositeOperation = 'source-over';
           });
-        } else {
-          this.context.globalCompositeOperation = 'overlay';
-          this.context.drawImage(this.logo, this.logoLeft, this.logoTop, single ? this.logoWidth * 1.5 : this.logoWidth, single ? this.logoHeight * 1.5 : this.logoHeight);
-          this.context.globalCompositeOperation = 'source-over';
         }
+        this.context.globalCompositeOperation = 'source-over';
+        this.context.drawImage(this.logo, this.logoLeft, this.logoTop, single ? this.logoWidth * 1.5 : this.logoWidth, single ? this.logoHeight * 1.5 : this.logoHeight);
       });
     } else {
       const timeline = new Timeline({
@@ -127,7 +122,7 @@ export default class ChromeStep {
         },
         onUpdate: () => {
           this.canvasUtils.redrawCurrentCanvas();
-          this.context.globalCompositeOperation = 'overlay';
+          this.context.globalCompositeOperation = 'source-over';
           this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
           this.context.drawImage(this.logo, this.logoLeft, this.logoTop, this.logoWidth, this.logoHeight);
           this.context.globalCompositeOperation = 'source-over';

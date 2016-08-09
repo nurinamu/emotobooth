@@ -2,18 +2,17 @@
 
 'use strict';
 
-// import ImageElement from './imageElement';
-import nextImageElement from './imageElementNext';
+import nextImageElement from './image/imageElementNext';
+import horizonImageElement from './image/imageElementHorizon';
 import JsonElement from './jsonElement';
 
-const EVENT_NAME_NEXT = 'google-next';
-const EVENT = EVENT_NAME_NEXT;
-
-// const EVENT_NAME_HORIZON = 'google-horizon';
-// const EVENT = EVENT_NAME_HORIZON;
+import {
+  EVENT_NAME_NEXT,
+  EVENT_NAME_HORIZON
+} from './image/_imageConst';
 
 export default class Panel {
-  constructor(jsonData) {
+  constructor(jsonData, eventName) {
     this.imagePath = jsonData.origPath;
     this.reqPath = jsonData.reqPath;
     this.respPath = jsonData.respPath;
@@ -22,18 +21,20 @@ export default class Panel {
     this.image = null;
     this.jsonElement = null;
 
+    this.eventName = eventName;
+
     this.init();
   }
 
   init() {
-    if (EVENT === EVENT_NAME_NEXT) {
+    if (this.eventName === EVENT_NAME_NEXT) {
       this.image = new nextImageElement(this.imagePath, this.respPath, () => {
          this.imageIsReady();
       });
-    } else {
-      // this.image = new ImageElementSplit(this.imagePath, this.respPath, () => {
-      //    this.imageIsReady();
-      // });
+    } else if (this.eventName === EVENT_NAME_HORIZON) {
+      this.image = new horizonImageElement(this.imagePath, this.respPath, () => {
+         this.imageIsReady();
+      });
     }
 
     this.jsonElement = new JsonElement(this.reqPath, this.respPath);

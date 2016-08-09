@@ -1,4 +1,4 @@
-/* global require, single, document, window, Image */
+/* global require, single, document, window, Image, requestAnimationFrame */
 
 'use strict';
 
@@ -6,13 +6,31 @@ import * as animationUtils from './../_animationUtils';
 import * as geometryUtils from './../_geometryUtils';
 import * as colorUtils from './../_colorUtils';
 import pointUtils from './_pointUtils';
+import * as ease from './../_easings';
+
+import {
+  TOTAL_CIRCLE_FRAMES
+} from './_imageConst';
+
+const Tween = require('gsap/src/minified/TweenMax.min.js');
+
+const BASE_RADIUS = 115;
+const BASE_GROUP_RADIUS = 225;
+const CIRCLE_OFFSET = 30;
+const CIRCLE_GROUP_OFFSET = 75;
+const NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
 
 export default class CanvasUtils {
   constructor(imageElement) {
     this.imageElement = imageElement;
-    this.backgroundFill = 'blue';
 
     this.pointUtils = new pointUtils(imageElement);
+
+    this.shapeScale = 1;
+    
+    if (single) {
+      this.shapeScale = 2;
+    }
 
     this.PIXEL_RATIO = (function () {
         const ctx = document.createElement('canvas').getContext('2d'),
@@ -93,14 +111,14 @@ export default class CanvasUtils {
         y: this.imageElement.offsetY * -1 * this.imageElement.resizedImageScale
       };
 
-      if (this.backgroundFill === 'blue' || this.backgroundFill === 'rgba(0, 0, 255, 1)') {
+      if (this.imageElement.backgroundFill === 'blue' || this.imageElement.backgroundFill === 'rgba(0, 0, 255, 1)') {
         const dataSample = animationUtils.getSquareColorSample(this.imageElement.canvas, 10, new geometryUtils.Point(this.imageElement.canvas.width / 2, this.imageElement.offsetY));
-        this.backgroundFill = dataSample;
+        this.imageElement.backgroundFill = dataSample;
         this.redrawBaseImage();
       }
     } else {
       this.imageElement.context.drawImage(this.imageElement.image, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.subRect.width, this.imageElement.subRect.height, 0, 0, this.imageElement.canvas.width, this.imageElement.canvas.height);
-      if (this.backgroundFill === 'blue' || this.backgroundFill === 'rgba(0, 0, 255, 1)') {
+      if (this.imageElement.backgroundFill === 'blue' || this.imageElement.backgroundFill === 'rgba(0, 0, 255, 1)') {
         let sampleOffset = 1;
         if (this.imageElement.resizedImageScale) {
           sampleOffset = this.imageElement.imageScale / this.imageElement.resizedImageScale;
@@ -108,7 +126,7 @@ export default class CanvasUtils {
 
         const dataSample = animationUtils.getSquareColorSample(this.imageElement.canvas, 10, new geometryUtils.Point(Math.min(this.imageElement.canvas.width / 2, Math.abs(this.imageElement.offsetX)), (Math.min(this.imageElement.offsetY, 0) * -1 * sampleOffset)));
 
-        this.backgroundFill = dataSample;
+        this.imageElement.backgroundFill = dataSample;
         this.redrawBaseImage();
       }
     }
@@ -333,7 +351,7 @@ export default class CanvasUtils {
   }
 
   fillBackground() {
-    this.imageElement.context.fillStyle = this.backgroundFill;
+    this.imageElement.context.fillStyle = this.imageElement.backgroundFill;
     this.imageElement.context.globalAlpha = 1;
     this.imageElement.context.globalCompositeOperation = 'source-over';
     this.imageElement.context.fillRect(0, 0, this.imageElement.canvas.width, this.imageElement.canvas.height);
@@ -383,6 +401,208 @@ export default class CanvasUtils {
     gradient.addColorStop(colorstop2, edgeColor);
 
     return gradient;
+  }
+
+  createShapeBackground(opacity) {
+    this.imageElement.context.save();
+    this.imageElement.context.moveTo(0, 0);
+    this.imageElement.context.translate(0, 0);
+
+    const group = this.imageElement.facesAndEmotions.length !== 1;
+
+    let color = null;
+
+    let EMO_COLOR = colorUtils.NEUTRAL;
+    if (!this.imageElement.noEmotions) {
+      if (group) {
+        const gradientColors = this.imageElement.treatments.groupAuraColors;
+        EMO_COLOR = gradientColors[0];
+      } else {
+        EMO_COLOR = this.imageElement.treatments.treatment.background;
+      }
+    }
+
+    colorUtils.NEUTRAL_WHITE
+
+    color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
+
+    let baseRadius = BASE_RADIUS;
+    if (group) {
+      baseRadius = BASE_GROUP_RADIUS;
+    }
+
+    let circleOffset = CIRCLE_OFFSET;
+    if (group) {
+      circleOffset = CIRCLE_GROUP_OFFSET;
+    }
+
+    this.imageElement.context.globalCompositeOperation = 'screen';
+    this.imageElement.context.fillStyle = color;
+    this.imageElement.context.beginPath();
+    this.imageElement.context.moveTo(0, 0);
+    this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
+    this.imageElement.context.lineTo(this.imageElement.canvasWidth, this.imageElement.canvasHeight);
+    this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
+    this.imageElement.context.lineTo(0, 0);
+
+    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, Math.PI * 2);
+    this.imageElement.context.fill();
+    this.imageElement.context.closePath();
+
+    this.imageElement.context.restore();
+  }
+
+  drawCircle() {
+    const group = this.imageElement.facesAndEmotions.length !== 1;
+
+    let baseRadius = BASE_RADIUS;
+    if (group) {
+      baseRadius = BASE_GROUP_RADIUS;
+    }
+
+    let circleOffset = CIRCLE_OFFSET;
+    if (group) {
+      circleOffset = CIRCLE_GROUP_OFFSET;
+    }
+
+    const emoColor = NEUTRAL_LINE_COLOR;
+
+    this.imageElement.context.save();
+
+    const perc = ease.expOut(0, 1, this.imageElement.currentFrame / TOTAL_CIRCLE_FRAMES);
+
+    if (this.imageElement.currentFrame < TOTAL_CIRCLE_FRAMES) {
+      requestAnimationFrame(this.drawCircle.bind(this));
+
+      this.imageElement.context.save();
+      this.imageElement.context.strokeStyle = emoColor;
+      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.beginPath();
+
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, (Math.PI * 2) * perc);
+
+      this.imageElement.context.stroke();
+      this.imageElement.context.restore();
+      this.imageElement.currentFrame++;
+    } else {
+      this.createTopShapes(true, 0);
+    }
+
+    this.imageElement.context.restore();
+  }
+
+  createTopShapes(single, progress) {
+    const group = this.imageElement.facesAndEmotions.length !== 1;
+    const emoColor = NEUTRAL_LINE_COLOR;
+
+    this.imageElement.context.save();
+
+    this.imageElement.context.translate(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y);
+
+    this.imageElement.context.globalCompositeOperation = 'source-over';
+
+    this.imageElement.context.restore();
+    this.imageElement.context.save();
+    this.imageElement.context.translate(0, 0);
+    this.imageElement.context.strokeStyle = emoColor;
+    this.imageElement.context.lineWidth = this.shapeScale;
+
+    let baseRadius = BASE_RADIUS * this.shapeScale;
+    if (group) {
+      baseRadius = BASE_GROUP_RADIUS * this.shapeScale;
+    }
+
+    let circleOffset = CIRCLE_OFFSET;
+    if (group) {
+      circleOffset = CIRCLE_GROUP_OFFSET;
+    }
+
+    this.imageElement.context.beginPath();
+    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+    this.imageElement.context.closePath();
+    this.imageElement.context.stroke();
+
+    if (!this.imageElement.randomizedArcs) {
+      this.imageElement.randomizedArcs = [];
+      for (let i = 0; i < 3; i++) {
+        this.imageElement.randomizedArcs.push(Math.random() * Math.PI);
+      }
+    }
+
+    if (!single) {
+
+      if (!this.imageElement.shapesInit) {
+        this.imageElement.shapesInit = true;
+
+        this.circleAnim = 0;
+        
+        let timing = 1.5;
+
+        if (progress === 1) {
+          timing = 0;
+        }
+
+        Tween.to(this, timing, { circleAnim: 1, delay: 0 });
+        // Tween.to(this, 2, { triangleC: 1, delay: 0, ease: EASING });
+      }
+
+      // 2
+
+      this.imageElement.context.restore();
+      this.imageElement.context.save();
+      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.strokeStyle = emoColor;
+      this.imageElement.context.lineWidth = this.shapeScale;
+
+      let randomOffset = this.imageElement.randomizedArcs[0];
+
+      this.imageElement.context.beginPath();
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 10, randomOffset, randomOffset + (this.circleAnim * Math.PI));
+      this.imageElement.context.stroke();
+
+      // 3
+
+      randomOffset = this.imageElement.randomizedArcs[1];
+
+      this.imageElement.context.restore();
+      this.imageElement.context.save();
+      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.strokeStyle = emoColor;
+      this.imageElement.context.lineWidth = this.shapeScale;
+
+      this.imageElement.context.beginPath();
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 30, randomOffset, randomOffset + (this.circleAnim * (Math.PI * 0.5)));
+      this.imageElement.context.stroke();
+
+      // 4
+
+      randomOffset = this.imageElement.randomizedArcs[2];
+
+      this.imageElement.context.restore();
+      this.imageElement.context.save();
+      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.strokeStyle = emoColor;
+      this.imageElement.context.lineWidth = this.shapeScale;
+
+      this.imageElement.context.beginPath();
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + (-(0.1 * Math.PI)), randomOffset + (this.circleAnim * (Math.PI * 0.7)));
+      this.imageElement.context.stroke();
+
+      // 5
+
+      this.imageElement.context.restore();
+      this.imageElement.context.save();
+      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.strokeStyle = emoColor;
+      this.imageElement.context.lineWidth = this.shapeScale;
+
+      this.imageElement.context.beginPath();
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + (0.8 * Math.PI), randomOffset + (0.8 * Math.PI + (this.circleAnim * Math.PI)));
+      this.imageElement.context.stroke();
+   }
+
+    this.imageElement.context.restore();
   }
 
 }

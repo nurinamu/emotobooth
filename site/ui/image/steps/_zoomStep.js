@@ -61,6 +61,7 @@ export default class ZoomStep {
         this.imageElement.width = width;
         this.imageElement.height = height;
         this.imageElement.imageScale = width / this.canvas.width;
+        
         if (zoomOut) {
           this.imageElement.eyesMidpoint = this.pointUtils.pointToGridCoords(this.imageElement.allEyesCenter);
         } else {

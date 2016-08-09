@@ -2,25 +2,21 @@
 
 'use strict';
 
-import PanelComponent from './panelComponent';
+import PanelComponent from './../panelComponent';
 
-//
-import flashStep from './image/steps/_flashStep';
-import zoomStep from './image/steps/_zoomStep';
-import faceStep from './image/steps/_faceStep';
-import emotionStep from './image/steps/_emotionStep';
-import mutliAuraStep from './image/steps/_multiAuraStep';
-import backgroundStep from './image/steps/_backgroundStep';
-import vignetteStep from './image/steps/_vignetteStep';
-import haloStep from './image/steps/_haloStep';
-import chromeStep from './image/steps/_chromeStep';
-//
+import flashStep from './steps/_flashStep';
+import zoomStep from './steps/_zoomStep';
+import faceStep from './steps/_faceStep';
+import emotionStep from './steps/_emotionStep';
+import backgroundStep from './steps/horizon/_backgroundStep';
+import haloStep from './steps/horizon/_haloStep';
+import chromeStep from './steps/horizon/_chromeStep';
 
-import * as faceUtils from './_faceUtils';
-import * as animationUtils from './_animationUtils';
-import * as geometryUtils from './_geometryUtils';
-import canvasUtils from './image/_canvasUtils';
-import * as imageConst from './image/_imageConst';
+import * as faceUtils from '../_faceUtils';
+import * as animationUtils from '../_animationUtils';
+import * as geometryUtils from '../_geometryUtils';
+import canvasUtils from './_canvasUtils';
+import * as imageConst from './_imageConst';
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
 export default class ImageElement extends PanelComponent {
@@ -36,9 +32,13 @@ export default class ImageElement extends PanelComponent {
     this.width = 0;
     this.height = 0;
 
+    this.currentFrame = 0;
+
     this.imageElement = null;
 
     this.scrimAlpha = 0;
+
+    this.backgroundFill = 'blue';
 
     this.eyeMidpoints = [];
     this.eyesMidpoint = new geometryUtils.Point();
@@ -74,27 +74,6 @@ export default class ImageElement extends PanelComponent {
     this.readyCallback = readyCallback;
 
     this.hexVertices = [];
-
-    // this.imgPath = imgPath;
-
-    // this.finalImage = null;
-
-    // this.jsonPath = jsonPath;
-    // this.json = null;
-    
-    // this.fills = [];
-
-    // this.facesAndStrongestEmotions = null;
-
-    // this.gradientURL = null;
-
-    // this.totalEmotions = 0;
-    // this.noEmotions = true;
-
-    // this.facesAndColors = [];
-    
-    
-    // this.vignettePattern = null;
 
     this.init();
   }
@@ -208,8 +187,8 @@ export default class ImageElement extends PanelComponent {
     this.flashStep = new flashStep(this, this.canvas, this.context, duration);
   }
 
-  zoom(duration = 0) {
-    this.zoomStep.zoom(duration, false);
+  zoom(duration = 0, zoomOut) {
+    this.zoomStep.zoom(duration, zoomOut);
   }
 
   face(duration = 0) {
@@ -256,15 +235,11 @@ export default class ImageElement extends PanelComponent {
     this.backgroundStep = new backgroundStep(this, this.canvas, this.context, duration);
   }
 
-  animateInMultiAura(duration = 0) {
-    this.mutliAuraStep = new mutliAuraStep(this, this.canvas, this.context, duration);
-  }
-
-  animateInVignette(duration = 0) {
-    this.vignetteStep = new vignetteStep(this, this.canvas, this.context, duration);
-  }
-
   animateInHalo(duration = 0) {
+    this.haloStep = new haloStep(this, this.canvas, this.context, duration);
+  }
+
+  animateInHaloMulti(duration = 0) {
     this.haloStep = new haloStep(this, this.canvas, this.context, duration);
   }
 

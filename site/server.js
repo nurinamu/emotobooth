@@ -16,11 +16,7 @@ var request = require('request');
 var _ = require('underscore');
 var logger = require('winston');
 var socket = require('socket.io-client')('http://127.0.0.1:8080');
-try {
-  var CREDENTIALS = require('./credentials.json');
-} catch (e) {
-  console.log("No social credentials were found. This is running in local mode only.")
-}
+var CREDENTIALS = require('./credentials.json');
 var emote = require('./emote');
 var sessionImages = {};
 var sessionId = 1;
@@ -36,15 +32,7 @@ logger.level = 'debug';
 
 // Parse args, read config, and configure
 var argv = require('minimist')(process.argv.slice(2));
-try {
-  var config = require('./config');
-} catch (e) {
-  throw "No config.js file found. Please follow the format in config.js.example";
-}
-
-if (!config.api_key) {
-  throw "You need an API key in config.js in order to run this program. Please add to config.js";
-}
+var config = require('./config');
 
 config.port = argv.p || argv.port || config.port || 8081;
 config.displayPort = argv.displayp || argv.displayport || config.display_port || 8080;
@@ -72,9 +60,8 @@ client.hkeys("image-data", function (err, replies) {
   });
 });
 
-if (CREDENTIALS) {
-  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
-}
+
+let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
 
 // Define job mapping
 var jobMapping = {
@@ -484,6 +471,19 @@ function finishedImage(job, finish) {
 }
 connectJob('finishedImage', finishedImage);
 
+function runPhantomPhotoStrip(childArgs) {
+  cp.execFile(phantomBinPath, childArgs,
+    (err, stdout, stderr) => {
+      console.log(err, stdout, stderr);
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('completed');
+      }
+    }
+  )
+}
+
 function processFinalImages(sess) {
   console.log('PROCESS FINAL IMAGES');
   saveSession(sess);
@@ -511,13 +511,45 @@ function processFinalImages(sess) {
 
     //socket.emit('new_image', JSON.stringify(sess[sess.highestScoredKey]));
 
-    sess.id = (new Date()).getTime();
+    const finalSessionID = (new Date()).getTime();
+    sess.id = finalSessionID
 
-    if (argv.share) {
-      socialPublisher.share(sess);
-    } else {
-      saveSession(sess);
+    const photostripImages = [];
+
+    // Use overall session id to create a photostrip image path
+    const photostripPath = config.photostripDir + finalSessionID + '/';
+    //const renderPhotoStripPath = config.printDir + finalSessionID + '/';
+    const renderPhotoStripPath = config.printDir + finalSessionID + '-photostrip.jpg';
+
+    // If the folder doesn't exist, create it
+    if (!fs.existsSync(photostripPath)){
+      fs.mkdirSync(photostripPath);
     }
+
+    // Copy each chromeless photo to the photostrip folder
+    for (let key in sess) {
+      if(sess[key].wasProcessed) {
+        const imageName = sess[key].id + '.jpg'
+        const filePath = photostripPath + imageName;
+        photostripImages.push(imageName);
+        fs.createReadStream(sess[key].chromelessPath).pipe(fs.createWriteStream(filePath));
+      }
+    }
+
+    var childArgs = [
+      path.join(__dirname, 'scripts/phantomPhotostripProcess.js'),
+      photostripPath,
+      renderPhotoStripPath,
+      photostripImages
+    ];
+
+    runPhantomPhotoStrip(childArgs);
+
+    // if (argv.share) {
+    //   socialPublisher.share(sess);
+    // } else {
+    saveSession(sess);
+    // }
     // sessionIsComplete = false;
   } else {
     console.log(`images processed ${done} / ${count}`);

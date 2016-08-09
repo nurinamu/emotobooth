@@ -32,6 +32,7 @@ export const SCRIM = 'rgb(0, 0, 0, 1)';
 export const SCRIM_MAX_ALPHA = 0.3;
 
 export const NEUTRAL = 'rgba(34, 45, 51, 1)';
+export const NEUTRAL_WHITE = 'rgba(255, 255, 255, 1)';
 export const TRANSPARENT = 'rgba(255, 255, 255, 0)';
 export const WHITE = 'rgba(255, 255, 255, 1)';
 export const BLACK = 'rgba(0, 0, 0, 1)';

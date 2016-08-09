@@ -175,3 +175,63 @@ second argument.
 
 Random note: kue can't have multiple callbacks assigned to a single event, so
 two different jobs can't have the same `in` event assigned to them.
+
+
+## Photostrip Printer Setup
+
+Mitsubishi Printer Instructions
+
+These are instructions for setting up the Mitsubishi K60 printer to a Mac that has the Emotobooth project set up, so photostrips generated from the app will automatically be sent to the printer at the correct size.
+
+### Install Drivers:
+
+* Go To: [http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/drivers_printers_digi_en.htm](http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/drivers_printers_digi_en.htm)
+* Download the Mac/OS drivers for 60
+* Install the drivers
+* Restart your computer
+* Open Printer & Scanners System Preference Window
+* Click the +
+* Search for MITSUBISHI CK60
+* If not already selected, under Use: select ‘Select Software’ and then select the corresponding drivers
+
+[Direct link to drivers](http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/cpk60dws/CPK60DW-S_Mac_Ver100.zip)
+
+### Setting Default Print Size:
+
+* In Terminal enter: cupsctl WebInterface=yes
+* Enter your username/password when prompted
+* Go to: http://localhost:631/printers/
+* Click: MITSUBISHI_CK60
+* Click the “Administration” Dropdown
+* Select “Set default options”
+* Under Media Size, select “5x15x2 Type1(2x6”x2)
+
+### Setting Default Print Preferences:
+
+* Open an image in preview
+* File > Print
+* Set Paper Size to 5x15x2 Type1(2x6”x2)
+* Check Auto Rotate
+* Select Scale to Fit and Print Entire Image
+* Select the “Preview” dropdown and then click Paper Handling
+* Under Destination Paper Size, select 5x15x2 Type1(2x6”x2)
+* Near the top select Presets > Save Current Settings as Preset
+* Type in a name
+* Then click Presets > Show Presets…
+* Uncheck Reset Presets Menu to “Default Settings”
+* Select PhotoStrips
+* Hit Cancel
+
+### Setting Automator to look for new photos:
+
+* Open Automator
+* Create a new Folder Action
+* Choose the folder you would like the printer to watch
+* on the left search Print and select Print Images
+* Select the middle Orientation option and select Mitsubishi in printer
+* Save
+* Files will now print when they are saved into the folder
+
+## Known Issues
+
+* Adding files to the /in folder that are the same name as something already in the folder, will cause blank photos to be generated, please make sure to only place uniquely named photos into this directory

@@ -2,12 +2,12 @@
 
 'use strict';
 
-import * as ease from './../../_easings';
+import * as ease from './../../../_easings';
 
-import * as animationUtils from './../../_animationUtils';
-import * as colorUtils from './../../_colorUtils';
-import pointUtils from './../_pointUtils';
-import canvasUtils from './../_canvasUtils';
+import * as animationUtils from './../../../_animationUtils';
+import * as colorUtils from './../../../_colorUtils';
+import pointUtils from './../../_pointUtils';
+import canvasUtils from './../../_canvasUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 

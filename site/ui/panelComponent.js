@@ -142,6 +142,7 @@ export default class PanelComponent {
     animStates.forEach((state) => {
       this.animations.to(this, Math.max(state.DURATION / this.timeFactor, animationUtils.MIN_DURATION), {
         onStart: () => {
+          window.console.log(this[state.NAME]);
           if (this[state.NAME]) {
             this[state.NAME](state.DURATION / this.timeFactor);
           } else {

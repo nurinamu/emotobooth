@@ -50,7 +50,7 @@
 	
 	__webpack_require__(2);
 	
-	__webpack_require__(40);
+	__webpack_require__(54);
 
 
 /***/ },
@@ -140,6 +140,7 @@
 	var timingsType = 'normal';
 	window.states = null;
 	var newImage = null;
+	var eventName = null;
 	
 	var refreshTimer = null;
 	// faster timing for when images have not been processed for a while
@@ -162,7 +163,7 @@
 	  if (panels.length < 3) {
 	    oldestPanel = panels.length + 1;
 	
-	    var newPanel = new _panel2.default(jsonData);
+	    var newPanel = new _panel2.default(jsonData, eventName);
 	    panels.push(newPanel);
 	  } else {
 	    if (jsonData.sessionId !== latestSessionId) {
@@ -301,19 +302,19 @@
 	
 	function loadStatesAndTimes() {
 	  if (timingsType === 'fast') {
-	    window.states = __webpack_require__(33);
+	    window.states = __webpack_require__(33)("./" + eventName + '/_timings-fast.js');
 	  } else if (timingsType === 'finalOnly') {
-	    window.states = __webpack_require__(34);
+	    window.states = __webpack_require__(36)("./" + eventName + '/_timings-finalOnly.js');
 	  } else if (timingsType === 'noFace') {
-	    window.states = __webpack_require__(35);
+	    window.states = __webpack_require__(39)("./" + eventName + '/_timings-noFace.js');
 	  } else if (timingsType === 'noAura') {
-	    window.states = __webpack_require__(36);
+	    window.states = __webpack_require__(42)("./" + eventName + '/_timings-noAura.js');
 	  } else if (timingsType === 'noChrome') {
-	    window.states = __webpack_require__(37);
+	    window.states = __webpack_require__(45)("./" + eventName + '/_timings-noChrome.js');
 	  } else if (timingsType === 'finalOnlyNoChrome') {
-	    window.states = __webpack_require__(38);
+	    window.states = __webpack_require__(48)("./" + eventName + '/_timings-finalOnlyNoChrome.js');
 	  } else {
-	    window.states = __webpack_require__(39);
+	    window.states = __webpack_require__(51)("./" + eventName + '/_timings.js');
 	  }
 	}
 	
@@ -321,6 +322,7 @@
 	  zoom = window.location.href.includes('zoom');
 	  controls = window.location.href.includes('controls');
 	  showGrid = window.location.href.includes('showgrid');
+	  eventName = !window.location.href.includes('event') ? 'horizon' : window.location.href.split('event=')[1].split('&')[0].split('?')[0];
 	  timingsType = !window.location.href.includes('timing') ? 'normal' : window.location.href.split('timing=')[1].split('&')[0];
 	
 	  if (timingsType === 'noChrome' && window.location.pathname.includes('single')) {
@@ -426,8 +428,6 @@
 	
 	'use strict';
 	
-	// import ImageElement from './imageElement';
-	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
@@ -438,22 +438,22 @@
 	
 	var _imageElementNext2 = _interopRequireDefault(_imageElementNext);
 	
+	var _imageElementHorizon = __webpack_require__(29);
+	
+	var _imageElementHorizon2 = _interopRequireDefault(_imageElementHorizon);
+	
 	var _jsonElement = __webpack_require__(30);
 	
 	var _jsonElement2 = _interopRequireDefault(_jsonElement);
+	
+	var _imageConst = __webpack_require__(11);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var EVENT_NAME_NEXT = 'google-next';
-	var EVENT = EVENT_NAME_NEXT;
-	
-	// const EVENT_NAME_HORIZON = 'google-horizon';
-	// const EVENT = EVENT_NAME_HORIZON;
-	
 	var Panel = function () {
-	  function Panel(jsonData) {
+	  function Panel(jsonData, eventName) {
 	    _classCallCheck(this, Panel);
 	
 	    this.imagePath = jsonData.origPath;
@@ -464,6 +464,8 @@
 	    this.image = null;
 	    this.jsonElement = null;
 	
+	    this.eventName = eventName;
+	
 	    this.init();
 	  }
 	
@@ -472,14 +474,14 @@
 	    value: function init() {
 	      var _this = this;
 	
-	      if (EVENT === EVENT_NAME_NEXT) {
+	      if (this.eventName === _imageConst.EVENT_NAME_NEXT) {
 	        this.image = new _imageElementNext2.default(this.imagePath, this.respPath, function () {
 	          _this.imageIsReady();
 	        });
-	      } else {
-	        // this.image = new ImageElementSplit(this.imagePath, this.respPath, () => {
-	        //    this.imageIsReady();
-	        // });
+	      } else if (this.eventName === _imageConst.EVENT_NAME_HORIZON) {
+	        this.image = new _imageElementHorizon2.default(this.imagePath, this.respPath, function () {
+	          _this.imageIsReady();
+	        });
 	      }
 	
 	      this.jsonElement = new _jsonElement2.default(this.reqPath, this.respPath);
@@ -635,15 +637,15 @@
 	
 	var _flashStep2 = _interopRequireDefault(_flashStep);
 	
-	var _zoomStep = __webpack_require__(20);
+	var _zoomStep = __webpack_require__(19);
 	
 	var _zoomStep2 = _interopRequireDefault(_zoomStep);
 	
-	var _faceStep = __webpack_require__(22);
+	var _faceStep = __webpack_require__(21);
 	
 	var _faceStep2 = _interopRequireDefault(_faceStep);
 	
-	var _emotionStep = __webpack_require__(23);
+	var _emotionStep = __webpack_require__(22);
 	
 	var _emotionStep2 = _interopRequireDefault(_emotionStep);
 	
@@ -696,10 +698,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	//
-	
-	//
 	
 	var Timeline = __webpack_require__(14);
 	
@@ -762,27 +760,6 @@
 	    _this.readyCallback = readyCallback;
 	
 	    _this.hexVertices = [];
-	
-	    // this.imgPath = imgPath;
-	
-	    // this.finalImage = null;
-	
-	    // this.jsonPath = jsonPath;
-	    // this.json = null;
-	
-	    // this.fills = [];
-	
-	    // this.facesAndStrongestEmotions = null;
-	
-	    // this.gradientURL = null;
-	
-	    // this.totalEmotions = 0;
-	    // this.noEmotions = true;
-	
-	    // this.facesAndColors = [];
-	
-	
-	    // this.vignettePattern = null;
 	
 	    _this.init();
 	    return _this;
@@ -1236,6 +1213,7 @@
 	      animStates.forEach(function (state) {
 	        _this5.animations.to(_this5, Math.max(state.DURATION / _this5.timeFactor, animationUtils.MIN_DURATION), {
 	          onStart: function onStart() {
+	            window.console.log(_this5[state.NAME]);
 	            if (_this5[state.NAME]) {
 	              _this5[state.NAME](state.DURATION / _this5.timeFactor);
 	            } else {
@@ -1925,6 +1903,7 @@
 	var SCRIM_MAX_ALPHA = exports.SCRIM_MAX_ALPHA = 0.3;
 	
 	var NEUTRAL = exports.NEUTRAL = 'rgba(34, 45, 51, 1)';
+	var NEUTRAL_WHITE = exports.NEUTRAL_WHITE = 'rgba(255, 255, 255, 1)';
 	var TRANSPARENT = exports.TRANSPARENT = 'rgba(255, 255, 255, 0)';
 	var WHITE = exports.WHITE = 'rgba(255, 255, 255, 1)';
 	var BLACK = exports.BLACK = 'rgba(0, 0, 0, 1)';
@@ -2054,6 +2033,11 @@
 	var LOGO_LEFT = exports.LOGO_LEFT = 40;
 	var LOGO_WIDTH = exports.LOGO_WIDTH = 110;
 	var LOGO_HEIGHT = exports.LOGO_HEIGHT = 43;
+	
+	var EVENT_NAME_NEXT = exports.EVENT_NAME_NEXT = 'next';
+	var EVENT_NAME_HORIZON = exports.EVENT_NAME_HORIZON = 'horizon';
+	
+	var TOTAL_CIRCLE_FRAMES = exports.TOTAL_CIRCLE_FRAMES = 75;
 
 /***/ },
 /* 12 */
@@ -4110,7 +4094,7 @@
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* global require, single, document, window, Image */
+	/* global require, single, document, window, Image, requestAnimationFrame */
 	
 	'use strict';
 	
@@ -4132,9 +4116,15 @@
 	
 	var colorUtils = _interopRequireWildcard(_colorUtils);
 	
-	var _pointUtils = __webpack_require__(19);
+	var _pointUtils = __webpack_require__(18);
 	
 	var _pointUtils2 = _interopRequireDefault(_pointUtils);
+	
+	var _easings = __webpack_require__(23);
+	
+	var ease = _interopRequireWildcard(_easings);
+	
+	var _imageConst = __webpack_require__(11);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4142,14 +4132,27 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	var Tween = __webpack_require__(12);
+	
+	var BASE_RADIUS = 115;
+	var BASE_GROUP_RADIUS = 225;
+	var CIRCLE_OFFSET = 30;
+	var CIRCLE_GROUP_OFFSET = 75;
+	var NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
+	
 	var CanvasUtils = function () {
 	  function CanvasUtils(imageElement) {
 	    _classCallCheck(this, CanvasUtils);
 	
 	    this.imageElement = imageElement;
-	    this.backgroundFill = 'blue';
 	
 	    this.pointUtils = new _pointUtils2.default(imageElement);
+	
+	    this.shapeScale = 1;
+	
+	    if (single) {
+	      this.shapeScale = 2;
+	    }
 	
 	    this.PIXEL_RATIO = function () {
 	      var ctx = document.createElement('canvas').getContext('2d'),
@@ -4234,14 +4237,14 @@
 	          y: this.imageElement.offsetY * -1 * this.imageElement.resizedImageScale
 	        };
 	
-	        if (this.backgroundFill === 'blue' || this.backgroundFill === 'rgba(0, 0, 255, 1)') {
+	        if (this.imageElement.backgroundFill === 'blue' || this.imageElement.backgroundFill === 'rgba(0, 0, 255, 1)') {
 	          var dataSample = animationUtils.getSquareColorSample(this.imageElement.canvas, 10, new geometryUtils.Point(this.imageElement.canvas.width / 2, this.imageElement.offsetY));
-	          this.backgroundFill = dataSample;
+	          this.imageElement.backgroundFill = dataSample;
 	          this.redrawBaseImage();
 	        }
 	      } else {
 	        this.imageElement.context.drawImage(this.imageElement.image, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.subRect.width, this.imageElement.subRect.height, 0, 0, this.imageElement.canvas.width, this.imageElement.canvas.height);
-	        if (this.backgroundFill === 'blue' || this.backgroundFill === 'rgba(0, 0, 255, 1)') {
+	        if (this.imageElement.backgroundFill === 'blue' || this.imageElement.backgroundFill === 'rgba(0, 0, 255, 1)') {
 	          var sampleOffset = 1;
 	          if (this.imageElement.resizedImageScale) {
 	            sampleOffset = this.imageElement.imageScale / this.imageElement.resizedImageScale;
@@ -4249,7 +4252,7 @@
 	
 	          var _dataSample = animationUtils.getSquareColorSample(this.imageElement.canvas, 10, new geometryUtils.Point(Math.min(this.imageElement.canvas.width / 2, Math.abs(this.imageElement.offsetX)), Math.min(this.imageElement.offsetY, 0) * -1 * sampleOffset));
 	
-	          this.backgroundFill = _dataSample;
+	          this.imageElement.backgroundFill = _dataSample;
 	          this.redrawBaseImage();
 	        }
 	      }
@@ -4503,7 +4506,7 @@
 	  }, {
 	    key: 'fillBackground',
 	    value: function fillBackground() {
-	      this.imageElement.context.fillStyle = this.backgroundFill;
+	      this.imageElement.context.fillStyle = this.imageElement.backgroundFill;
 	      this.imageElement.context.globalAlpha = 1;
 	      this.imageElement.context.globalCompositeOperation = 'source-over';
 	      this.imageElement.context.fillRect(0, 0, this.imageElement.canvas.width, this.imageElement.canvas.height);
@@ -4569,6 +4572,211 @@
 	
 	      return gradient;
 	    }
+	  }, {
+	    key: 'createShapeBackground',
+	    value: function createShapeBackground(opacity) {
+	      this.imageElement.context.save();
+	      this.imageElement.context.moveTo(0, 0);
+	      this.imageElement.context.translate(0, 0);
+	
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	
+	      var color = null;
+	
+	      var EMO_COLOR = colorUtils.NEUTRAL;
+	      if (!this.imageElement.noEmotions) {
+	        if (group) {
+	          var gradientColors = this.imageElement.treatments.groupAuraColors;
+	          EMO_COLOR = gradientColors[0];
+	        } else {
+	          EMO_COLOR = this.imageElement.treatments.treatment.background;
+	        }
+	      }
+	
+	      colorUtils.NEUTRAL_WHITE;
+	
+	      color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
+	
+	      var baseRadius = BASE_RADIUS;
+	      if (group) {
+	        baseRadius = BASE_GROUP_RADIUS;
+	      }
+	
+	      var circleOffset = CIRCLE_OFFSET;
+	      if (group) {
+	        circleOffset = CIRCLE_GROUP_OFFSET;
+	      }
+	
+	      this.imageElement.context.globalCompositeOperation = 'screen';
+	      this.imageElement.context.fillStyle = color;
+	      this.imageElement.context.beginPath();
+	      this.imageElement.context.moveTo(0, 0);
+	      this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
+	      this.imageElement.context.lineTo(this.imageElement.canvasWidth, this.imageElement.canvasHeight);
+	      this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
+	      this.imageElement.context.lineTo(0, 0);
+	
+	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, Math.PI * 2);
+	      this.imageElement.context.fill();
+	      this.imageElement.context.closePath();
+	
+	      this.imageElement.context.restore();
+	    }
+	  }, {
+	    key: 'drawCircle',
+	    value: function drawCircle() {
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	
+	      var baseRadius = BASE_RADIUS;
+	      if (group) {
+	        baseRadius = BASE_GROUP_RADIUS;
+	      }
+	
+	      var circleOffset = CIRCLE_OFFSET;
+	      if (group) {
+	        circleOffset = CIRCLE_GROUP_OFFSET;
+	      }
+	
+	      var emoColor = NEUTRAL_LINE_COLOR;
+	
+	      this.imageElement.context.save();
+	
+	      var perc = ease.expOut(0, 1, this.imageElement.currentFrame / _imageConst.TOTAL_CIRCLE_FRAMES);
+	
+	      if (this.imageElement.currentFrame < _imageConst.TOTAL_CIRCLE_FRAMES) {
+	        requestAnimationFrame(this.drawCircle.bind(this));
+	
+	        this.imageElement.context.save();
+	        this.imageElement.context.strokeStyle = emoColor;
+	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.beginPath();
+	
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, Math.PI * 2 * perc);
+	
+	        this.imageElement.context.stroke();
+	        this.imageElement.context.restore();
+	        this.imageElement.currentFrame++;
+	      } else {
+	        this.createTopShapes(true, 0);
+	      }
+	
+	      this.imageElement.context.restore();
+	    }
+	  }, {
+	    key: 'createTopShapes',
+	    value: function createTopShapes(single, progress) {
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	      var emoColor = NEUTRAL_LINE_COLOR;
+	
+	      this.imageElement.context.save();
+	
+	      this.imageElement.context.translate(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y);
+	
+	      this.imageElement.context.globalCompositeOperation = 'source-over';
+	
+	      this.imageElement.context.restore();
+	      this.imageElement.context.save();
+	      this.imageElement.context.translate(0, 0);
+	      this.imageElement.context.strokeStyle = emoColor;
+	      this.imageElement.context.lineWidth = this.shapeScale;
+	
+	      var baseRadius = BASE_RADIUS * this.shapeScale;
+	      if (group) {
+	        baseRadius = BASE_GROUP_RADIUS * this.shapeScale;
+	      }
+	
+	      var circleOffset = CIRCLE_OFFSET;
+	      if (group) {
+	        circleOffset = CIRCLE_GROUP_OFFSET;
+	      }
+	
+	      this.imageElement.context.beginPath();
+	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+	      this.imageElement.context.closePath();
+	      this.imageElement.context.stroke();
+	
+	      if (!this.imageElement.randomizedArcs) {
+	        this.imageElement.randomizedArcs = [];
+	        for (var i = 0; i < 3; i++) {
+	          this.imageElement.randomizedArcs.push(Math.random() * Math.PI);
+	        }
+	      }
+	
+	      if (!single) {
+	
+	        if (!this.imageElement.shapesInit) {
+	          this.imageElement.shapesInit = true;
+	
+	          this.circleAnim = 0;
+	
+	          var timing = 1.5;
+	
+	          if (progress === 1) {
+	            timing = 0;
+	          }
+	
+	          Tween.to(this, timing, { circleAnim: 1, delay: 0 });
+	          // Tween.to(this, 2, { triangleC: 1, delay: 0, ease: EASING });
+	        }
+	
+	        // 2
+	
+	        this.imageElement.context.restore();
+	        this.imageElement.context.save();
+	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.strokeStyle = emoColor;
+	        this.imageElement.context.lineWidth = this.shapeScale;
+	
+	        var randomOffset = this.imageElement.randomizedArcs[0];
+	
+	        this.imageElement.context.beginPath();
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 10, randomOffset, randomOffset + this.circleAnim * Math.PI);
+	        this.imageElement.context.stroke();
+	
+	        // 3
+	
+	        randomOffset = this.imageElement.randomizedArcs[1];
+	
+	        this.imageElement.context.restore();
+	        this.imageElement.context.save();
+	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.strokeStyle = emoColor;
+	        this.imageElement.context.lineWidth = this.shapeScale;
+	
+	        this.imageElement.context.beginPath();
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 30, randomOffset, randomOffset + this.circleAnim * (Math.PI * 0.5));
+	        this.imageElement.context.stroke();
+	
+	        // 4
+	
+	        randomOffset = this.imageElement.randomizedArcs[2];
+	
+	        this.imageElement.context.restore();
+	        this.imageElement.context.save();
+	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.strokeStyle = emoColor;
+	        this.imageElement.context.lineWidth = this.shapeScale;
+	
+	        this.imageElement.context.beginPath();
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + -(0.1 * Math.PI), randomOffset + this.circleAnim * (Math.PI * 0.7));
+	        this.imageElement.context.stroke();
+	
+	        // 5
+	
+	        this.imageElement.context.restore();
+	        this.imageElement.context.save();
+	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.strokeStyle = emoColor;
+	        this.imageElement.context.lineWidth = this.shapeScale;
+	
+	        this.imageElement.context.beginPath();
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + 0.8 * Math.PI, randomOffset + (0.8 * Math.PI + this.circleAnim * Math.PI));
+	        this.imageElement.context.stroke();
+	      }
+	
+	      this.imageElement.context.restore();
+	    }
 	  }]);
 	
 	  return CanvasUtils;
@@ -4578,60 +4786,6 @@
 
 /***/ },
 /* 18 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.linear = linear;
-	exports.square = square;
-	exports.cube = cube;
-	exports.exp = exp;
-	exports.expOut = expOut;
-	function linear() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	
-	  return startVal + (endVal - startVal) * progress;
-	}
-	
-	function square() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	
-	  return startVal + (endVal - startVal) * Math.pow(progress, 2);
-	}
-	
-	function cube() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	
-	  return startVal + (endVal - startVal) * Math.pow(progress, 3);
-	}
-	
-	function exp() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	
-	  return startVal + (endVal - startVal) * Math.pow(2, 10 * (progress - 1));
-	}
-	
-	function expOut() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	
-	  return startVal + (endVal - startVal) * (-1 * Math.pow(2, -10 * progress) + 1);
-	}
-
-/***/ },
-/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global require */
@@ -4808,7 +4962,7 @@
 	exports.default = PointUtils;
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global require */
@@ -4821,7 +4975,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _utils = __webpack_require__(21);
+	var _utils = __webpack_require__(20);
 	
 	var utils = _interopRequireWildcard(_utils);
 	
@@ -4833,7 +4987,7 @@
 	
 	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
 	
-	var _pointUtils = __webpack_require__(19);
+	var _pointUtils = __webpack_require__(18);
 	
 	var _pointUtils2 = _interopRequireDefault(_pointUtils);
 	
@@ -4906,6 +5060,7 @@
 	          _this.imageElement.width = width;
 	          _this.imageElement.height = height;
 	          _this.imageElement.imageScale = width / _this.canvas.width;
+	
 	          if (zoomOut) {
 	            _this.imageElement.eyesMidpoint = _this.pointUtils.pointToGridCoords(_this.imageElement.allEyesCenter);
 	          } else {
@@ -4966,7 +5121,7 @@
 	exports.default = ZoomStep;
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -5007,7 +5162,7 @@
 	}
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global require */
@@ -5032,7 +5187,7 @@
 	
 	var faceUtils = _interopRequireWildcard(_faceUtils);
 	
-	var _pointUtils = __webpack_require__(19);
+	var _pointUtils = __webpack_require__(18);
 	
 	var _pointUtils2 = _interopRequireDefault(_pointUtils);
 	
@@ -5173,7 +5328,7 @@
 	exports.default = FaceStep;
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global require */
@@ -5186,7 +5341,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
@@ -5327,6 +5482,60 @@
 	exports.default = EmotionStep;
 
 /***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.linear = linear;
+	exports.square = square;
+	exports.cube = cube;
+	exports.exp = exp;
+	exports.expOut = expOut;
+	function linear() {
+	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	
+	  return startVal + (endVal - startVal) * progress;
+	}
+	
+	function square() {
+	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	
+	  return startVal + (endVal - startVal) * Math.pow(progress, 2);
+	}
+	
+	function cube() {
+	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	
+	  return startVal + (endVal - startVal) * Math.pow(progress, 3);
+	}
+	
+	function exp() {
+	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	
+	  return startVal + (endVal - startVal) * Math.pow(2, 10 * (progress - 1));
+	}
+	
+	function expOut() {
+	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	
+	  return startVal + (endVal - startVal) * (-1 * Math.pow(2, -10 * progress) + 1);
+	}
+
+/***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -5340,7 +5549,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
@@ -5352,7 +5561,7 @@
 	
 	var colorUtils = _interopRequireWildcard(_colorUtils);
 	
-	var _pointUtils = __webpack_require__(19);
+	var _pointUtils = __webpack_require__(18);
 	
 	var _pointUtils2 = _interopRequireDefault(_pointUtils);
 	
@@ -5631,7 +5840,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
@@ -5797,7 +6006,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
@@ -5948,7 +6157,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
@@ -6114,11 +6323,11 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _easings = __webpack_require__(18);
+	var _easings = __webpack_require__(23);
 	
 	var ease = _interopRequireWildcard(_easings);
 	
-	var _assets = __webpack_require__(29);
+	var _assets = __webpack_require__(58);
 	
 	var assets = _interopRequireWildcard(_assets);
 	
@@ -6383,14 +6592,391 @@
 
 /***/ },
 /* 29 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	/* global require, single, document, states, requestAnimationFrame */
+	
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var logoSrc = exports.logoSrc = 'data:image/png;base64,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';
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _panelComponent = __webpack_require__(5);
+	
+	var _panelComponent2 = _interopRequireDefault(_panelComponent);
+	
+	var _flashStep = __webpack_require__(16);
+	
+	var _flashStep2 = _interopRequireDefault(_flashStep);
+	
+	var _zoomStep = __webpack_require__(19);
+	
+	var _zoomStep2 = _interopRequireDefault(_zoomStep);
+	
+	var _faceStep = __webpack_require__(21);
+	
+	var _faceStep2 = _interopRequireDefault(_faceStep);
+	
+	var _emotionStep = __webpack_require__(22);
+	
+	var _emotionStep2 = _interopRequireDefault(_emotionStep);
+	
+	var _backgroundStep = __webpack_require__(59);
+	
+	var _backgroundStep2 = _interopRequireDefault(_backgroundStep);
+	
+	var _haloStep = __webpack_require__(60);
+	
+	var _haloStep2 = _interopRequireDefault(_haloStep);
+	
+	var _chromeStep = __webpack_require__(61);
+	
+	var _chromeStep2 = _interopRequireDefault(_chromeStep);
+	
+	var _faceUtils = __webpack_require__(6);
+	
+	var faceUtils = _interopRequireWildcard(_faceUtils);
+	
+	var _animationUtils = __webpack_require__(9);
+	
+	var animationUtils = _interopRequireWildcard(_animationUtils);
+	
+	var _geometryUtils = __webpack_require__(8);
+	
+	var geometryUtils = _interopRequireWildcard(_geometryUtils);
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	var _imageConst = __webpack_require__(11);
+	
+	var imageConst = _interopRequireWildcard(_imageConst);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var ImageElement = function (_PanelComponent) {
+	  _inherits(ImageElement, _PanelComponent);
+	
+	  function ImageElement() {
+	    var imgPath = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	    var jsonPath = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	    var readyCallback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	
+	    _classCallCheck(this, ImageElement);
+	
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ImageElement).call(this));
+	
+	    _this.canvasWidth = single ? imageConst.BACKEND_CANVAS_WIDTH : imageConst.CANVAS_WIDTH;
+	    _this.canvasHeight = single ? imageConst.BACKEND_CANVAS_HEIGHT : imageConst.CANVAS_HEIGHT;
+	
+	    _this.canvas = null;
+	    _this.context = null;
+	
+	    _this.width = 0;
+	    _this.height = 0;
+	
+	    _this.currentFrame = 0;
+	
+	    _this.imageElement = null;
+	
+	    _this.scrimAlpha = 0;
+	
+	    _this.backgroundFill = 'blue';
+	
+	    _this.eyeMidpoints = [];
+	    _this.eyesMidpoint = new geometryUtils.Point();
+	    _this.allEyesCenter = new geometryUtils.Point();
+	
+	    _this.canvasSnapshot = null;
+	
+	    _this.offsetX = 0;
+	    _this.offsetY = 0;
+	
+	    _this.image = null;
+	
+	    _this.resizedImageOffset = null;
+	    _this.subRect = {};
+	
+	    _this.imageScale = 1;
+	
+	    _this.faceBounds = null;
+	
+	    _this.facesAndEmotions = [];
+	    _this.curFace = [];
+	    _this.hexR = 1;
+	
+	    _this.tweens = [];
+	    _this.timelines = [];
+	
+	    _this.treatments = {};
+	
+	    _this.resizedImageScale = 0;
+	
+	    _this.isDrawing = false;
+	    _this.auraAnimations = null;
+	    _this.readyCallback = readyCallback;
+	
+	    _this.hexVertices = [];
+	
+	    _this.init();
+	    return _this;
+	  }
+	
+	  _createClass(ImageElement, [{
+	    key: 'init',
+	    value: function init() {
+	      if (this.imageElement) {
+	        return;
+	      }
+	
+	      this.imageElement = document.createElement('div');
+	      this.imageElement.classList.add('image');
+	
+	      this.canvasUtils = new _canvasUtils2.default(this);
+	
+	      this.canvas = this.canvasUtils.createHiDPICanvas(this.canvasWidth, this.canvasHeight, 4);
+	      this.canvas.classList.add('image-canvas');
+	      this.canvas.width = this.canvasWidth;
+	      this.canvas.height = this.canvasHeight;
+	
+	      this.imageElement.appendChild(this.canvas);
+	
+	      this.context = this.canvas.getContext('2d');
+	
+	      this.faceStep = new _faceStep2.default(this, this.canvas, this.context);
+	      this.zoomStep = new _zoomStep2.default(this, this.canvas, this.context);
+	
+	      animationUtils.setSmoothing(this.context);
+	    }
+	  }, {
+	    key: 'loadImage',
+	    value: function loadImage(json, imgPath) {
+	      this.canvasUtils.loadImage(json, imgPath);
+	    }
+	  }, {
+	    key: 'startAnimations',
+	    value: function startAnimations() {
+	      var _this2 = this;
+	
+	      if (single) {
+	        this.zoom(0, true);
+	        this.startAuraAnimations();
+	      } else {
+	        _get(Object.getPrototypeOf(ImageElement.prototype), 'startAnimations', this).call(this, function () {
+	          _this2.startAuraAnimations();
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'startAuraAnimations',
+	    value: function startAuraAnimations() {
+	      var _this3 = this;
+	
+	      this.auraAnimations = new Timeline({
+	        onComplete: function onComplete() {
+	          _get(Object.getPrototypeOf(ImageElement.prototype), 'killTimeline', _this3).call(_this3, _this3.auraAnimations);
+	        }
+	      });
+	
+	      var auraAnimStates = this.faces.length === 1 ? states.STATES_AURA_SINGLE : states.STATES_AURA_MULTIPLE;
+	
+	      auraAnimStates.forEach(function (state) {
+	        _this3.auraAnimations.to(_this3, Math.max(state.DURATION, animationUtils.MIN_DURATION), {
+	          onStart: function onStart() {
+	            if (_this3[state.NAME]) {
+	              _this3[state.NAME](state.DURATION);
+	            } else {
+	              _this3.pause(state.DURATION);
+	            }
+	          }
+	        });
+	      });
+	
+	      this.timelines.push(this.auraAnimations);
+	    }
+	  }, {
+	    key: 'reinitFaces',
+	    value: function reinitFaces(json) {
+	      var _this4 = this;
+	
+	      _get(Object.getPrototypeOf(ImageElement.prototype), 'reinitFaces', this).call(this, json, function () {
+	        _this4.backgroundFill = 'blue';
+	        _this4.totalEmotions = 0;
+	        _this4.imageScale = 1;
+	        _this4.hexVertices = [];
+	        _this4.facesAndEmotions = faceUtils.generateFacesAndEmotions(_this4.faces);
+	        _this4.facesAndStrongestEmotions = faceUtils.generateFacesAndEmotions(_this4.faces, true);
+	        _this4.treatments = animationUtils.generateTreatments(_this4.facesAndStrongestEmotions);
+	        _this4.eyeMidpoints = faceUtils.generateEyeMidpoints(_this4.faces);
+	        _this4.faceBounds = faceUtils.generateFaceBounds(_this4.faces);
+	        _this4.allEyesCenter = faceUtils.generateAllEyesCenter(_this4.faces);
+	        var totalEmotions = 0;
+	        _this4.facesAndEmotions.forEach(function (face) {
+	          totalEmotions += Object.keys(face).length;
+	        });
+	        _this4.noEmotions = totalEmotions === 0;
+	        _this4.totalEmotions = totalEmotions;
+	        _this4.scrimAlpha = 0;
+	        _this4.fills = [];
+	        _this4.vignettePattern = null;
+	        _this4.resizedImageOffset = null;
+	        _this4.resizedImageScale = 0;
+	        _this4.auraAnimations = null;
+	        _this4.offsetX = 0;
+	        _this4.offsetY = 0;
+	      });
+	    }
+	  }, {
+	    key: 'ifNotDrawing',
+	    value: function ifNotDrawing(callback) {
+	      var _this5 = this;
+	
+	      requestAnimationFrame(function () {
+	        if (_this5.isDrawing) {
+	          _this5.imageElement.ifNotDrawing(callback);
+	        } else {
+	          callback();
+	        }
+	      });
+	    }
+	
+	    //
+	
+	  }, {
+	    key: 'flash',
+	    value: function flash() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.flashStep = new _flashStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }, {
+	    key: 'zoom',
+	    value: function zoom() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var zoomOut = arguments[1];
+	
+	      this.zoomStep.zoom(duration, zoomOut);
+	    }
+	  }, {
+	    key: 'face',
+	    value: function face() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.face(duration);
+	    }
+	  }, {
+	    key: 'forehead',
+	    value: function forehead() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.forehead(duration);
+	    }
+	  }, {
+	    key: 'eyes',
+	    value: function eyes() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.eyes(duration);
+	    }
+	  }, {
+	    key: 'ears',
+	    value: function ears() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.ears(duration);
+	    }
+	  }, {
+	    key: 'nose',
+	    value: function nose() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.nose(duration);
+	    }
+	  }, {
+	    key: 'mouth',
+	    value: function mouth() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.mouth(duration);
+	    }
+	  }, {
+	    key: 'chin',
+	    value: function chin() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.chin(duration);
+	    }
+	  }, {
+	    key: 'allFeatures',
+	    value: function allFeatures() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.faceStep.allFeatures(duration);
+	    }
+	  }, {
+	    key: 'zoomOut',
+	    value: function zoomOut() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.zoomStep.zoom(duration, true);
+	    }
+	  }, {
+	    key: 'emotion',
+	    value: function emotion() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.emotionStep = new _emotionStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }, {
+	    key: 'animateInBackground',
+	    value: function animateInBackground() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.backgroundStep = new _backgroundStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }, {
+	    key: 'animateInHalo',
+	    value: function animateInHalo() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }, {
+	    key: 'animateInHaloMulti',
+	    value: function animateInHaloMulti() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }, {
+	    key: 'chrome',
+	    value: function chrome() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	
+	      this.chromeStep = new _chromeStep2.default(this, this.canvas, this.context, duration);
+	    }
+	  }]);
+	
+	  return ImageElement;
+	}(_panelComponent2.default);
+	
+	exports.default = ImageElement;
 
 /***/ },
 /* 30 */
@@ -6982,6 +7568,121 @@
 
 /***/ },
 /* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-fast.js": 34,
+		"./next/_timings-fast.js": 35
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 33;
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 0.2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 0.3
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 0.2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+
+/***/ },
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7077,7 +7778,74 @@
 	}];
 
 /***/ },
-/* 34 */
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-finalOnly.js": 37,
+		"./next/_timings-finalOnly.js": 38
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 36;
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 0
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 0
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 0
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 0
+	}];
+
+/***/ },
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7125,7 +7893,74 @@
 	}];
 
 /***/ },
-/* 35 */
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-noFace.js": 40,
+		"./next/_timings-noFace.js": 41
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 39;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+
+/***/ },
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7173,7 +8008,29 @@
 	}];
 
 /***/ },
-/* 36 */
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-noAura.js": 43,
+		"./next/_timings-noAura.js": 44
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 42;
+
+
+/***/ },
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7248,7 +8105,191 @@
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
 
 /***/ },
-/* 37 */
+/* 44 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 5
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-noChrome.js": 46,
+		"./next/_timings-noChrome.js": 47
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 45;
+
+
+/***/ },
+/* 46 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 5
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 4
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 4
+	}];
+
+/***/ },
+/* 47 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7338,7 +8379,68 @@
 	}];
 
 /***/ },
-/* 38 */
+/* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-finalOnlyNoChrome.js": 49,
+		"./next/_timings-finalOnlyNoChrome.js": 50
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 48;
+
+
+/***/ },
+/* 49 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 0
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 0
+	}];
+
+/***/ },
+/* 50 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7377,7 +8479,122 @@
 	}];
 
 /***/ },
-/* 39 */
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings.js": 52,
+		"./next/_timings.js": 53
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 51;
+
+
+/***/ },
+/* 52 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 5
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 4
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 2
+	}];
+
+/***/ },
+/* 53 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7473,16 +8690,16 @@
 	}];
 
 /***/ },
-/* 40 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(41);
+	var content = __webpack_require__(55);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(43)(content, {});
+	var update = __webpack_require__(57)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -7499,10 +8716,10 @@
 	}
 
 /***/ },
-/* 41 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(42)();
+	exports = module.exports = __webpack_require__(56)();
 	// imports
 	
 	
@@ -7513,7 +8730,7 @@
 
 
 /***/ },
-/* 42 */
+/* 56 */
 /***/ function(module, exports) {
 
 	/*
@@ -7569,7 +8786,7 @@
 
 
 /***/ },
-/* 43 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -7821,6 +9038,634 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
+
+/***/ },
+/* 58 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var logoSrc = exports.logoSrc = 'data:image/png;base64,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';
+	
+	var googleLogoSrc = exports.googleLogoSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHMAAAAnCAYAAAA8XHcHAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTExIDc5LjE1ODMyNSwgMjAxNS8wOS8xMC0wMToxMDoyMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjRFNzA2Qjg0MzQwMTFFNkEwQjhBQUFEQzlGNjRFQzgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjRFNzA2Qjk0MzQwMTFFNkEwQjhBQUFEQzlGNjRFQzgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2NEU3MDZCNjQzNDAxMUU2QTBCOEFBQURDOUY2NEVDOCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2NEU3MDZCNzQzNDAxMUU2QTBCOEFBQURDOUY2NEVDOCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pkep0CUAAAoBSURBVHja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';
+
+/***/ },
+/* 59 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global require */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _easings = __webpack_require__(23);
+	
+	var ease = _interopRequireWildcard(_easings);
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	var _imageConst = __webpack_require__(11);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var BackgroundStep = function () {
+	  function BackgroundStep(imageElement, canvas, context, duration) {
+	    _classCallCheck(this, BackgroundStep);
+	
+	    this.imageElement = imageElement;
+	    this.canvas = canvas;
+	    this.context = context;
+	    this.vignettePattern;
+	
+	    this.circleStarted = false;
+	
+	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
+	
+	    this.animateInBackground(duration);
+	  }
+	
+	  _createClass(BackgroundStep, [{
+	    key: 'animateInBackgroundFrame',
+	    value: function animateInBackgroundFrame() {
+	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      this.context.save();
+	
+	      this.canvasUtils.redrawBaseImage();
+	
+	      this.canvasUtils.createShapeBackground(progress * 0.75);
+	
+	      if (!this.circleStarted && progress !== 1) {
+	        this.circleStarted = true;
+	        this.canvasUtils.drawCircle();
+	      } else {
+	        if (this.imageElement.currentFrame >= _imageConst.TOTAL_CIRCLE_FRAMES) {
+	          this.canvasUtils.createTopShapes(true, 0);
+	        }
+	      }
+	
+	      this.context.restore();
+	    }
+	  }, {
+	    key: 'animateInBackground',
+	    value: function animateInBackground() {
+	      var _this = this;
+	
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      var rEnd = this.canvas.width;
+	
+	      if (duration === 0) {
+	        this.imageElement.ifNotDrawing(function () {
+	          _this.animateInBackgroundFrame(1, rEnd);
+	        });
+	      } else {
+	        (function () {
+	          var active = null;
+	          var backgroundTimeline = new Timeline({
+	            onStart: function onStart() {
+	              _this.imageElement.timelines.push(backgroundTimeline);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTimeline(backgroundTimeline);
+	              _this.context.restore();
+	            }
+	          });
+	
+	          var rStart = _this.imageElement.hexR;
+	          var progress = 0;
+	          var currR = rStart;
+	
+	          backgroundTimeline.to(_this.canvas, duration, {
+	            onStart: function onStart() {
+	              active = backgroundTimeline.getActive()[0];
+	              _this.imageElement.tweens.push(active);
+	            },
+	            onUpdate: function onUpdate() {
+	              progress = active.progress();
+	              currR = ease.exp(rStart, rEnd, progress);
+	              _this.animateInBackgroundFrame(progress, currR);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTween(active);
+	            }
+	          });
+	        })();
+	      }
+	    }
+	  }]);
+	
+	  return BackgroundStep;
+	}();
+	
+	exports.default = BackgroundStep;
+
+/***/ },
+/* 60 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global require */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _easings = __webpack_require__(23);
+	
+	var ease = _interopRequireWildcard(_easings);
+	
+	var _colorUtils = __webpack_require__(10);
+	
+	var colorUtils = _interopRequireWildcard(_colorUtils);
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	var _emotionUtils = __webpack_require__(7);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var HaloStep = function () {
+	  function HaloStep(imageElement, canvas, context, duration) {
+	    _classCallCheck(this, HaloStep);
+	
+	    this.imageElement = imageElement;
+	    this.canvas = canvas;
+	    this.context = context;
+	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
+	
+	    this.animateInHalo(duration);
+	  }
+	
+	  _createClass(HaloStep, [{
+	    key: 'getStrongestColor',
+	    value: function getStrongestColor() {
+	      var emo = this.imageElement.facesAndStrongestEmotions;
+	      var strongestEmotion = 0;
+	
+	      var strength1 = _emotionUtils.EMOTION_STRENGTHS[emo[0][Object.keys(emo[0])[0]]];
+	      var strength2 = _emotionUtils.EMOTION_STRENGTHS[emo[1][Object.keys(emo[1])[0]]];
+	
+	      if (strength2 > strength1) {
+	        strongestEmotion = 1;
+	      }
+	
+	      var returnColor = void 0;
+	
+	      returnColor = this.imageElement.treatments.personalAuraColors[strongestEmotion][0];
+	
+	      if (returnColor === 'rgba(34, 45, 51, 1)') {
+	        var changeTo = strongestEmotion === 1 ? 0 : 1;
+	        returnColor = this.imageElement.treatments.personalAuraColors[changeTo][0];
+	      }
+	
+	      return returnColor;
+	    }
+	  }, {
+	    key: 'animateInHaloFrame',
+	    value: function animateInHaloFrame() {
+	      var prg = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      var progress = prg / 2;
+	      var gradientColors = this.imageElement.treatments.personalAuraColors;
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	
+	      this.canvasUtils.redrawBaseImage();
+	      this.context.save();
+	      this.canvasUtils.createShapeBackground(0.75);
+	
+	      if (!this.imageElement.noEmotions) {
+	
+	        if (this.imageElement.treatments.treatment) {
+	          if (this.imageElement.treatments.treatment.halo.outerColor === colorUtils.TRANSPARENT && this.imageElement.treatments.treatment.halo.innerColor === colorUtils.TRANSPARENT) {
+	            return;
+	          }
+	        }
+	
+	        if (this.imageElement.totalEmotions === 1) {
+	          var alpha = ease.expOut(0, 0.5, progress);
+	          var r = ease.expOut(this.canvas.height * 0.1, this.canvas.height * 1.6, progress);
+	
+	          var gradient = this.context.createRadialGradient(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, this.imageElement.hexR, this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, r);
+	
+	          if (group) {
+	            gradient.addColorStop(0, this.getStrongestColor());
+	          } else {
+	            gradient.addColorStop(0, this.imageElement.treatments.treatment.halo.innerColor);
+	
+	            if (this.imageElement.treatments.treatment.halo.outerColor !== colorUtils.TRANSPARENT) {
+	              gradient.addColorStop(0.5, this.imageElement.treatments.treatment.halo.outerColor);
+	            }
+	          }
+	          gradient.addColorStop(1, colorUtils.TRANSPARENT);
+	
+	          this.context.fillStyle = gradient;
+	          this.context.globalCompositeOperation = 'source-over';
+	          this.context.globalAlpha = alpha;
+	
+	          this.context.fill();
+	
+	          this.context.restore();
+	        } else {
+	          var _alpha = ease.expOut(0.2, 0.5, progress);
+	          var _r = ease.expOut(0.1, 1.2, progress);
+	
+	          if (group) {
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(gradientColors[0][0], colorUtils.TRANSPARENT, _r, false);
+	          } else {
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.outerColor, colorUtils.TRANSPARENT, _r, false);
+	          }
+	
+	          this.context.globalCompositeOperation = 'source-over';
+	          this.context.globalAlpha = _alpha;
+	
+	          this.context.fill();
+	
+	          var alpha2 = ease.expOut(0, 0.5, progress);
+	          var r2 = void 0;
+	          if (group) {
+	            r2 = ease.expOut(0, this.imageElement.hexR * 3 / this.canvas.height, progress);
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(gradientColors[1][0], 1), colorUtils.TRANSPARENT, r2, false, 0.4, 1);
+	          } else {
+	            r2 = ease.expOut(0, this.imageElement.hexR * (Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.radius : 3) / this.canvas.height, progress);
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(this.imageElement.treatments.treatment.halo.innerColor, Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.alpha : 1), colorUtils.TRANSPARENT, r2, false, 0.3, 1);
+	          }
+	
+	          this.context.globalAlpha = alpha2;
+	          this.context.fill();
+	
+	          this.context.restore();
+	        }
+	      }
+	
+	      this.canvasUtils.createTopShapes(false, prg);
+	    }
+	  }, {
+	    key: 'animateInHalo',
+	    value: function animateInHalo() {
+	      var _this = this;
+	
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	
+	      if (duration === 0) {
+	        this.imageElement.ifNotDrawing(function () {
+	          _this.animateInHaloFrame();
+	        });
+	      } else {
+	        (function () {
+	          var active = null;
+	          var progress = 0;
+	
+	          var haloTimeline = new Timeline({
+	            onStart: function onStart() {
+	              _this.imageElement.timelines.push(haloTimeline);
+	              // this.imageElement.createParticles();
+	              // this.imageElement.drawParticles();
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTimeline(haloTimeline);
+	              _this.context.restore();
+	              _this.imageElement.allDone = true;
+	            }
+	          });
+	
+	          haloTimeline.to(_this.canvas, duration, {
+	            onStart: function onStart() {
+	              _this.context.save();
+	              active = haloTimeline.getActive()[0];
+	              _this.imageElement.tweens.push(active);
+	              _this.context.restore();
+	            },
+	            onUpdate: function onUpdate() {
+	              progress = active.progress();
+	              if (!group) {
+	                if (!_this.imageElement.treatments.treatment.noEmotionScrim) {
+	                  _this.animateInHaloFrame(progress, _this.imageElement.treatments.treatment.halo.radius);
+	                } else {
+	                  _this.animateInHaloFrame(progress);
+	                }
+	              } else {
+	                _this.animateInHaloFrame(progress);
+	              }
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTween(active);
+	            }
+	          });
+	        })();
+	      }
+	    }
+	  }]);
+	
+	  return HaloStep;
+	}();
+	
+	exports.default = HaloStep;
+
+/***/ },
+/* 61 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global require, single, Image */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _easings = __webpack_require__(23);
+	
+	var ease = _interopRequireWildcard(_easings);
+	
+	var _assets = __webpack_require__(58);
+	
+	var assets = _interopRequireWildcard(_assets);
+	
+	var _animationUtils = __webpack_require__(9);
+	
+	var animationUtils = _interopRequireWildcard(_animationUtils);
+	
+	var _geometryUtils = __webpack_require__(8);
+	
+	var geometryUtils = _interopRequireWildcard(_geometryUtils);
+	
+	var _colorUtils = __webpack_require__(10);
+	
+	var colorUtils = _interopRequireWildcard(_colorUtils);
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var ChromeStep = function () {
+	  function ChromeStep(imageElement, canvas, context, duration) {
+	    _classCallCheck(this, ChromeStep);
+	
+	    this.imageElement = imageElement;
+	    this.canvas = canvas;
+	    this.context = context;
+	
+	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
+	
+	    this.logoTop = 35;
+	    this.logoLeft = 40;
+	    this.logoWidth = 115;
+	    this.logoHeight = 39;
+	
+	    this.logo = new Image();
+	    this.logo.src = assets.googleLogoSrc;
+	
+	    this.chrome(duration);
+	  }
+	
+	  _createClass(ChromeStep, [{
+	    key: 'chrome',
+	    value: function chrome() {
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	
+	      this.imageElement.finalImage = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+	      this.drawChrome(duration);
+	    }
+	  }, {
+	    key: 'drawChromeFrame',
+	    value: function drawChromeFrame() {
+	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var height = arguments.length <= 1 || arguments[1] === undefined ? 112 : arguments[1];
+	      var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	
+	      this.context.globalCompositeOperation = 'source-over';
+	      this.context.fillStyle = 'rgba(255, 255, 255, ' + progress + ')';
+	      this.context.fillRect(0, this.canvas.height - height, this.canvas.width, height);
+	
+	      if (callback) {
+	        callback();
+	      }
+	    }
+	  }, {
+	    key: 'drawChrome',
+	    value: function drawChrome() {
+	      var _this = this;
+	
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	
+	      var height = 0;
+	      if (single) {
+	        height = animationUtils.CHROME_SHORT_HEIGHT;
+	      } else {
+	        height = this.imageElement.totalEmotions <= animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS ? animationUtils.CHROME_SHORT_HEIGHT : animationUtils.CHROME_TALL_HEIGHT;
+	      }
+	      if (duration === 0) {
+	        this.imageElement.ifNotDrawing(function () {
+	          if (_this.imageElement.totalEmotions > 0) {
+	            _this.drawChromeFrame(1, height, function () {
+	              var tick = 0;
+	              _this.imageElement.facesAndEmotions.forEach(function (person) {
+	                for (var emotion in person) {
+	                  _this.drawChromeHex(height, emotion, person[emotion], tick, 1);
+	                  tick++;
+	                }
+	              });
+	            });
+	          }
+	          _this.context.globalCompositeOperation = 'source-over';
+	          _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, single ? _this.logoWidth * 1.5 : _this.logoWidth, single ? _this.logoHeight * 1.5 : _this.logoHeight);
+	        });
+	      } else {
+	        (function () {
+	          var timeline = new Timeline({
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTimeline(timeline);
+	            }
+	          });
+	          var currActive = null;
+	          var tick = -1;
+	          _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	          _this.canvasUtils.redrawCurrentCanvas();
+	          if (_this.imageElement.totalEmotions > 0) {
+	            timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	              onStart: function onStart() {
+	                currActive = timeline.getActive()[0];
+	                _this.imageElement.tweens.push(currActive);
+	              },
+	              onUpdate: function onUpdate() {
+	                var progress = currActive.progress();
+	                _this.drawChromeFrame(progress, height);
+	              },
+	              onComplete: function onComplete() {
+	                _this.imageElement.killTween(currActive);
+	              }
+	            });
+	
+	            _this.imageElement.facesAndEmotions.forEach(function (person) {
+	              var _loop = function _loop(emotion) {
+	                timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	                  onStart: function onStart() {
+	                    currActive = timeline.getActive()[0];
+	                    _this.imageElement.tweens.push(currActive);
+	                    tick++;
+	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	                  },
+	                  onUpdate: function onUpdate() {
+	                    _this.canvasUtils.redrawCurrentCanvas();
+	                    _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
+	                  },
+	                  onComplete: function onComplete() {
+	                    _this.canvasUtils.redrawCurrentCanvas();
+	                    _this.drawChromeHex(height, emotion, person[emotion], tick, 1);
+	                    _this.imageElement.killTween(currActive);
+	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	                  }
+	                });
+	              };
+	
+	              for (var emotion in person) {
+	                _loop(emotion);
+	              }
+	            });
+	          }
+	          timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	            onStart: function onStart() {
+	              currActive = timeline.getActive()[0];
+	            },
+	            onUpdate: function onUpdate() {
+	              _this.canvasUtils.redrawCurrentCanvas();
+	              _this.context.globalCompositeOperation = 'source-over';
+	              _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	              _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
+	              _this.context.globalCompositeOperation = 'source-over';
+	            }
+	          });
+	
+	          _this.imageElement.timelines.push(timeline);
+	        })();
+	      }
+	    }
+	  }, {
+	    key: 'drawChromeHex',
+	    value: function drawChromeHex(height, emotion, strength, num, progress) {
+	      var _this2 = this;
+	
+	      var radius = arguments.length <= 5 || arguments[5] === undefined ? animationUtils.CHROME_HEX_RADIUS : arguments[5];
+	
+	      if (num >= animationUtils.CHROME_MAX_ITEMS) {
+	        return;
+	      }
+	
+	      this.canvasUtils.retraceCanvas();
+	
+	      var x = 0;
+	      var y = 0;
+	      if (single) {
+	        x = animationUtils.CHROME_HORIZONTAL_PADDING + num % animationUtils.CHROME_MAX_ITEMS * animationUtils.BACKEND_CHROME_ITEM_WIDTH;
+	        y = this.canvas.height - height + animationUtils.CHROME_VERTICAL_PADDING + Math.floor(num / animationUtils.CHROME_MAX_ITEMS) * animationUtils.CHROME_SINGLE_LINE_HEIGHT + Math.floor(num / animationUtils.CHROME_MAX_ITEMS) * animationUtils.CHROME_SPACE_BETWEEN_LINES;
+	      } else {
+	        x = animationUtils.CHROME_HORIZONTAL_PADDING + num % (animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS) * animationUtils.CHROME_ITEM_WIDTH;
+	        y = this.canvas.height - height + animationUtils.CHROME_VERTICAL_PADDING + Math.floor(num / animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS) * animationUtils.CHROME_SINGLE_LINE_HEIGHT + Math.floor(num / (animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS)) * animationUtils.CHROME_SPACE_BETWEEN_LINES;
+	      }
+	      var hexPoints = geometryUtils.createRoundedHexagon(radius, radius / 5);
+	      this.context.beginPath();
+	      var hexStartX = x + radius;
+	      var hexStartY = y + radius;
+	      hexPoints.forEach(function (vertex, i, vertices) {
+	        vertex.x += hexStartX;
+	        vertex.y += hexStartY;
+	
+	        if (i === 0) {
+	          _this2.context.moveTo(vertex.x, vertex.y);
+	          return;
+	        }
+	        if (i % 2 === 0) {
+	          _this2.context.lineTo(vertex.x, vertex.y);
+	        } else {
+	          var prev = i === 0 ? vertices[vertices.length - 1] : vertices[i - 1];
+	          var xMid = (vertex.x + prev.x) / 2;
+	          var yMid = (vertex.y + prev.y) / 2;
+	
+	          var r = geometryUtils.distanceFromCoords(prev, vertex) / 2;
+	
+	          var bigIndex = Math.floor(i / 2);
+	          if ([5].includes(bigIndex)) {
+	            xMid -= r * (Math.sqrt(2) / 3);
+	          } else if ([2, 3].includes(bigIndex)) {
+	            xMid += r * (Math.sqrt(2) / 3);
+	          } else if ([4].includes(bigIndex)) {
+	            xMid += r * (Math.sqrt(2) / 3);
+	          } else if ([1].includes(bigIndex)) {
+	            xMid -= r * (Math.sqrt(2) / 3);
+	          } else if ([0].includes(bigIndex)) {
+	            xMid -= r * (Math.sqrt(3) / 3);
+	          }
+	
+	          if ([1, 2].includes(bigIndex)) {
+	            yMid += r / 2;
+	          } else if ([4, 5].includes(bigIndex)) {
+	            yMid -= r / 2;
+	          }
+	
+	          var startAngle = (30 + bigIndex * -1 * 60 + 360) % 360;
+	          var endAngle = (startAngle - 60 + 360) % 360;
+	
+	          _this2.context.arc(xMid, yMid, r, startAngle / 360 * (Math.PI * 2), endAngle / 360 * (Math.PI * 2), true);
+	        }
+	      });
+	      this.context.closePath();
+	      this.context.globalAlpha = ease.exp(0, 1, progress);
+	      var grad = this.context.createLinearGradient(x, y, x + radius * 2, y + radius * 2);
+	      grad.addColorStop(0, colorUtils[emotion][0]);
+	      grad.addColorStop(1, colorUtils[emotion][2]);
+	      this.context.fillStyle = grad;
+	      this.context.fill();
+	      this.context.globalAlpha = 1;
+	      this.context.font = '12px "Roboto Mono"';
+	      this.context.fillStyle = 'rgba(0, 0, 0, ' + ease.exp(0, 0.38, progress) + ')';
+	      this.context.fillText(emotion.toLowerCase() + ':' + strength, hexStartX + radius * 1.5, hexStartY + radius / 4);
+	    }
+	  }]);
+	
+	  return ChromeStep;
+	}();
+	
+	exports.default = ChromeStep;
 
 /***/ }
 /******/ ]);

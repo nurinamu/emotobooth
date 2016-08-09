@@ -2,9 +2,9 @@
 
 'use strict';
 
-import * as ease from './../../_easings';
-import * as geometryUtils from './../../_geometryUtils';
-import canvasUtils from './../_canvasUtils';
+import * as ease from './../../../_easings';
+import * as geometryUtils from './../../../_geometryUtils';
+import canvasUtils from './../../_canvasUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
