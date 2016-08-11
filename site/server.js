@@ -43,6 +43,14 @@ var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
 
+// If the folder doesn't exist, create it
+var checkDirs = [config.inDir, config.outDir, config.printDir, config.photostripDir];
+checkDirs.forEach((dir) => {
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
+});
+
 // Remove all files currently contained within the `in` directory
 fs.readdir(config.inDir, function(err,files) {
   files.forEach((file) => fs.unlink(config.inDir + file));
