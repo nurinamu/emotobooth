@@ -1213,7 +1213,6 @@
 	      animStates.forEach(function (state) {
 	        _this5.animations.to(_this5, Math.max(state.DURATION / _this5.timeFactor, animationUtils.MIN_DURATION), {
 	          onStart: function onStart() {
-	            window.console.log(_this5[state.NAME]);
 	            if (_this5[state.NAME]) {
 	              _this5[state.NAME](state.DURATION / _this5.timeFactor);
 	            } else {
@@ -6594,7 +6593,7 @@
 /* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* global require, single, document, states, requestAnimationFrame */
+	/* global require, single, document, states, requestAnimationFrame, window, setTimeout */
 	
 	'use strict';
 	
@@ -6637,6 +6636,10 @@
 	var _chromeStep = __webpack_require__(61);
 	
 	var _chromeStep2 = _interopRequireDefault(_chromeStep);
+	
+	var _particles = __webpack_require__(62);
+	
+	var _particles2 = _interopRequireDefault(_particles);
 	
 	var _faceUtils = __webpack_require__(6);
 	
@@ -6956,6 +6959,7 @@
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 	
 	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
+	      this.showParticles();
 	    }
 	  }, {
 	    key: 'animateInHaloMulti',
@@ -6963,6 +6967,20 @@
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 	
 	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
+	      this.showParticles();
+	    }
+	  }, {
+	    key: 'showParticles',
+	    value: function showParticles() {
+	      var _this6 = this;
+	
+	      if (window.location.href.split('timing=')[1].split('&')[0] === 'finalOnlyNoChrome') {
+	        this.particles = new _particles2.default(this, this.canvas, this.context);
+	        setTimeout(function () {
+	          _this6.context.globalAlpha = 1;
+	          _this6.particles.drawParticles();
+	        }, 1000);
+	      }
 	    }
 	  }, {
 	    key: 'chrome',
@@ -7942,10 +7960,10 @@
 	  DURATION: 2
 	}, {
 	  NAME: 'animateInHalo',
-	  DURATION: 4
+	  DURATION: 2
 	}, {
 	  NAME: 'chrome',
-	  DURATION: 2
+	  DURATION: 1
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
@@ -7953,10 +7971,10 @@
 	  DURATION: 2
 	}, {
 	  NAME: 'animateInHaloMulti',
-	  DURATION: 4
+	  DURATION: 2
 	}, {
 	  NAME: 'chrome',
-	  DURATION: 2
+	  DURATION: 1
 	}];
 
 /***/ },
@@ -8576,10 +8594,10 @@
 	  DURATION: 2
 	}, {
 	  NAME: 'animateInHalo',
-	  DURATION: 4
+	  DURATION: 2
 	}, {
 	  NAME: 'chrome',
-	  DURATION: 2
+	  DURATION: 1
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
@@ -8587,10 +8605,10 @@
 	  DURATION: 2
 	}, {
 	  NAME: 'animateInHaloMulti',
-	  DURATION: 4
+	  DURATION: 2
 	}, {
 	  NAME: 'chrome',
-	  DURATION: 2
+	  DURATION: 1
 	}];
 
 /***/ },
@@ -9348,8 +9366,6 @@
 	          var haloTimeline = new Timeline({
 	            onStart: function onStart() {
 	              _this.imageElement.timelines.push(haloTimeline);
-	              // this.imageElement.createParticles();
-	              // this.imageElement.drawParticles();
 	            },
 	            onComplete: function onComplete() {
 	              _this.imageElement.killTimeline(haloTimeline);
@@ -9378,6 +9394,7 @@
 	              }
 	            },
 	            onComplete: function onComplete() {
+	              _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
 	              _this.imageElement.killTween(active);
 	            }
 	          });
@@ -9395,7 +9412,7 @@
 /* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* global require, single, Image */
+	/* global require, single, Image, requestAnimationFrame, window, setTimeout */
 	
 	'use strict';
 	
@@ -9417,10 +9434,6 @@
 	
 	var animationUtils = _interopRequireWildcard(_animationUtils);
 	
-	var _geometryUtils = __webpack_require__(8);
-	
-	var geometryUtils = _interopRequireWildcard(_geometryUtils);
-	
 	var _colorUtils = __webpack_require__(10);
 	
 	var colorUtils = _interopRequireWildcard(_colorUtils);
@@ -9428,6 +9441,10 @@
 	var _canvasUtils = __webpack_require__(17);
 	
 	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	var _particles = __webpack_require__(62);
+	
+	var _particles2 = _interopRequireDefault(_particles);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -9463,8 +9480,18 @@
 	    value: function chrome() {
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
 	
-	      this.imageElement.finalImage = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+	      this.particles = new _particles2.default(this.imageElement, this.canvas, this.context);
 	      this.drawChrome(duration);
+	    }
+	  }, {
+	    key: 'drawParticles',
+	    value: function drawParticles() {
+	      requestAnimationFrame(this.drawParticles.bind(this));
+	      this.canvasUtils.redrawCurrentCanvas();
+	      if (this.imageElement.totalEmotions > 0) {
+	        this.drawChrome(0);
+	      }
+	      this.particles.drawParticles();
 	    }
 	  }, {
 	    key: 'drawChromeFrame',
@@ -9473,9 +9500,11 @@
 	      var height = arguments.length <= 1 || arguments[1] === undefined ? 112 : arguments[1];
 	      var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 	
+	      this.context.save();
 	      this.context.globalCompositeOperation = 'source-over';
 	      this.context.fillStyle = 'rgba(255, 255, 255, ' + progress + ')';
 	      this.context.fillRect(0, this.canvas.height - height, this.canvas.width, height);
+	      this.context.restore();
 	
 	      if (callback) {
 	        callback();
@@ -9507,6 +9536,10 @@
 	              });
 	            });
 	          }
+	
+	          _this.context.globalAlpha = 1;
+	          _this.particles.drawParticles();
+	
 	          _this.context.globalCompositeOperation = 'source-over';
 	          _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, single ? _this.logoWidth * 1.5 : _this.logoWidth, single ? _this.logoHeight * 1.5 : _this.logoHeight);
 	        });
@@ -9518,63 +9551,57 @@
 	            }
 	          });
 	          var currActive = null;
-	          var tick = -1;
-	          _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	          _this.canvasUtils.redrawCurrentCanvas();
 	          if (_this.imageElement.totalEmotions > 0) {
-	            timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	            timeline.to(_this, duration, {
 	              onStart: function onStart() {
 	                currActive = timeline.getActive()[0];
 	                _this.imageElement.tweens.push(currActive);
 	              },
 	              onUpdate: function onUpdate() {
 	                var progress = currActive.progress();
+	                _this.canvasUtils.redrawCurrentCanvas();
 	                _this.drawChromeFrame(progress, height);
+	
+	                _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	
+	                _this.particles.drawParticles();
+	
+	                _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
+	
+	                var tick = -1;
+	
+	                _this.imageElement.facesAndEmotions.forEach(function (person) {
+	                  for (var emotion in person) {
+	                    tick++;
+	                    // animationUtils.EMOTION_HEX_FADE_DURATION / this.imageElement.timeFactor
+	                    _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
+	                  }
+	                });
 	              },
 	              onComplete: function onComplete() {
 	                _this.imageElement.killTween(currActive);
+	                setTimeout(function () {
+	                  _this.drawParticles();
+	                }, 100);
 	              }
 	            });
-	
-	            _this.imageElement.facesAndEmotions.forEach(function (person) {
-	              var _loop = function _loop(emotion) {
-	                timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
-	                  onStart: function onStart() {
-	                    currActive = timeline.getActive()[0];
-	                    _this.imageElement.tweens.push(currActive);
-	                    tick++;
-	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	                  },
-	                  onUpdate: function onUpdate() {
-	                    _this.canvasUtils.redrawCurrentCanvas();
-	                    _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
-	                  },
-	                  onComplete: function onComplete() {
-	                    _this.canvasUtils.redrawCurrentCanvas();
-	                    _this.drawChromeHex(height, emotion, person[emotion], tick, 1);
-	                    _this.imageElement.killTween(currActive);
-	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	                  }
-	                });
-	              };
-	
-	              for (var emotion in person) {
-	                _loop(emotion);
+	          } else {
+	            timeline.to(_this, duration, {
+	              onStart: function onStart() {
+	                currActive = timeline.getActive()[0];
+	                _this.imageElement.tweens.push(currActive);
+	              },
+	              onUpdate: function onUpdate() {
+	                _this.canvasUtils.redrawCurrentCanvas();
+	                _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	                _this.particles.drawParticles();
+	              },
+	              onComplete: function onComplete() {
+	                _this.imageElement.killTween(currActive);
+	                _this.drawParticles();
 	              }
 	            });
 	          }
-	          timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
-	            onStart: function onStart() {
-	              currActive = timeline.getActive()[0];
-	            },
-	            onUpdate: function onUpdate() {
-	              _this.canvasUtils.redrawCurrentCanvas();
-	              _this.context.globalCompositeOperation = 'source-over';
-	              _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
-	              _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
-	              _this.context.globalCompositeOperation = 'source-over';
-	            }
-	          });
 	
 	          _this.imageElement.timelines.push(timeline);
 	        })();
@@ -9583,13 +9610,13 @@
 	  }, {
 	    key: 'drawChromeHex',
 	    value: function drawChromeHex(height, emotion, strength, num, progress) {
-	      var _this2 = this;
-	
 	      var radius = arguments.length <= 5 || arguments[5] === undefined ? animationUtils.CHROME_HEX_RADIUS : arguments[5];
 	
 	      if (num >= animationUtils.CHROME_MAX_ITEMS) {
 	        return;
 	      }
+	
+	      this.context.save();
 	
 	      this.canvasUtils.retraceCanvas();
 	
@@ -9602,52 +9629,11 @@
 	        x = animationUtils.CHROME_HORIZONTAL_PADDING + num % (animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS) * animationUtils.CHROME_ITEM_WIDTH;
 	        y = this.canvas.height - height + animationUtils.CHROME_VERTICAL_PADDING + Math.floor(num / animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS) * animationUtils.CHROME_SINGLE_LINE_HEIGHT + Math.floor(num / (animationUtils.CHROME_MAX_ITEMS / animationUtils.CHROME_MAX_ROWS)) * animationUtils.CHROME_SPACE_BETWEEN_LINES;
 	      }
-	      var hexPoints = geometryUtils.createRoundedHexagon(radius, radius / 5);
+	
 	      this.context.beginPath();
 	      var hexStartX = x + radius;
 	      var hexStartY = y + radius;
-	      hexPoints.forEach(function (vertex, i, vertices) {
-	        vertex.x += hexStartX;
-	        vertex.y += hexStartY;
-	
-	        if (i === 0) {
-	          _this2.context.moveTo(vertex.x, vertex.y);
-	          return;
-	        }
-	        if (i % 2 === 0) {
-	          _this2.context.lineTo(vertex.x, vertex.y);
-	        } else {
-	          var prev = i === 0 ? vertices[vertices.length - 1] : vertices[i - 1];
-	          var xMid = (vertex.x + prev.x) / 2;
-	          var yMid = (vertex.y + prev.y) / 2;
-	
-	          var r = geometryUtils.distanceFromCoords(prev, vertex) / 2;
-	
-	          var bigIndex = Math.floor(i / 2);
-	          if ([5].includes(bigIndex)) {
-	            xMid -= r * (Math.sqrt(2) / 3);
-	          } else if ([2, 3].includes(bigIndex)) {
-	            xMid += r * (Math.sqrt(2) / 3);
-	          } else if ([4].includes(bigIndex)) {
-	            xMid += r * (Math.sqrt(2) / 3);
-	          } else if ([1].includes(bigIndex)) {
-	            xMid -= r * (Math.sqrt(2) / 3);
-	          } else if ([0].includes(bigIndex)) {
-	            xMid -= r * (Math.sqrt(3) / 3);
-	          }
-	
-	          if ([1, 2].includes(bigIndex)) {
-	            yMid += r / 2;
-	          } else if ([4, 5].includes(bigIndex)) {
-	            yMid -= r / 2;
-	          }
-	
-	          var startAngle = (30 + bigIndex * -1 * 60 + 360) % 360;
-	          var endAngle = (startAngle - 60 + 360) % 360;
-	
-	          _this2.context.arc(xMid, yMid, r, startAngle / 360 * (Math.PI * 2), endAngle / 360 * (Math.PI * 2), true);
-	        }
-	      });
+	      this.context.arc(hexStartX, hexStartY, radius, 0, Math.PI * 2);
 	      this.context.closePath();
 	      this.context.globalAlpha = ease.exp(0, 1, progress);
 	      var grad = this.context.createLinearGradient(x, y, x + radius * 2, y + radius * 2);
@@ -9659,6 +9645,8 @@
 	      this.context.font = '12px "Roboto Mono"';
 	      this.context.fillStyle = 'rgba(0, 0, 0, ' + ease.exp(0, 0.38, progress) + ')';
 	      this.context.fillText(emotion.toLowerCase() + ':' + strength, hexStartX + radius * 1.5, hexStartY + radius / 4);
+	
+	      this.context.restore();
 	    }
 	  }]);
 	
@@ -9666,6 +9654,122 @@
 	}();
 	
 	exports.default = ChromeStep;
+
+/***/ },
+/* 62 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global single */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _colorUtils = __webpack_require__(10);
+	
+	var colorUtils = _interopRequireWildcard(_colorUtils);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	// const Tween = require('gsap/src/minified/TweenMax.min.js');
+	
+	var PARTICLE_COUNT = 7;
+	var NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
+	
+	var Particles = function () {
+	  function Particles(imageElement, canvas, context) {
+	    _classCallCheck(this, Particles);
+	
+	    this.imageElement = imageElement;
+	    this.particlesStarted = false;
+	    this.particles = [];
+	    this.particleCount = 0;
+	    this.particleFade = 1;
+	    this.killParticles = false;
+	
+	    this.canvas = canvas;
+	    this.context = context;
+	
+	    this.shapeScale = 1;
+	    if (single) {
+	      this.shapeScale = 2;
+	    }
+	
+	    this.createParticles();
+	  }
+	
+	  _createClass(Particles, [{
+	    key: 'calculateWithScale',
+	    value: function calculateWithScale(num) {
+	      return num * this.shapeScale;
+	    }
+	  }, {
+	    key: 'createParticles',
+	    value: function createParticles() {
+	      var i = 0;
+	      var xPoint = 0;
+	      var yPoint = 0;
+	
+	      var particlePoints = [{ x: this.imageElement.eyesMidpoint.x, y: this.imageElement.eyesMidpoint.y - this.calculateWithScale(160) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(200), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(15) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(100), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(210) }, { x: this.imageElement.eyesMidpoint.x - this.calculateWithScale(180), y: this.imageElement.eyesMidpoint.y - this.calculateWithScale(80) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(190), y: this.imageElement.eyesMidpoint.y - this.calculateWithScale(50) }, { x: this.imageElement.eyesMidpoint.x - this.calculateWithScale(170), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(115) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(40), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(220) }];
+	
+	      var group = this.imageElement.facesAndEmotions.length !== 1;
+	      if (group) {
+	        particlePoints = [{ x: this.imageElement.eyesMidpoint.x - this.calculateWithScale(20), y: this.imageElement.eyesMidpoint.y - this.calculateWithScale(220) }, { x: this.imageElement.eyesMidpoint.x - this.calculateWithScale(290), y: this.imageElement.eyesMidpoint.y }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(265), y: this.imageElement.eyesMidpoint.y - this.calculateWithScale(130) }, { x: this.imageElement.eyesMidpoint.x - this.calculateWithScale(220), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(275) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(290), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(111) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(320), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(80) }, { x: this.imageElement.eyesMidpoint.x + this.calculateWithScale(250), y: this.imageElement.eyesMidpoint.y + this.calculateWithScale(215) }];
+	      }
+	
+	      for (; i < PARTICLE_COUNT; i++) {
+	        xPoint = particlePoints[i].x;
+	        yPoint = particlePoints[i].y;
+	
+	        this.particles.push({
+	          x: xPoint,
+	          y: yPoint,
+	          size: 2,
+	          speed: (Math.random() * 0.5 + 0.5) / 30,
+	          radius: Math.random() * 10 + 2
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'drawParticles',
+	    value: function drawParticles() {
+	      var i = 0;
+	
+	      this.context.save();
+	
+	      var emoColor = NEUTRAL_LINE_COLOR;
+	      var color = colorUtils.subAlpha(emoColor, this.particleFade * .3);
+	
+	      this.context.fillStyle = color;
+	
+	      for (; i < PARTICLE_COUNT; i++) {
+	        var p = this.particles[i];
+	
+	        var x = p.x + Math.sin(this.particleCount * p.speed) * p.radius;
+	        var y = p.y + Math.cos(this.particleCount * p.speed) * p.radius;
+	        var s = p.size;
+	        this.context.beginPath();
+	        this.context.arc(x, y, s, 0, Math.PI * 2);
+	        this.context.fill();
+	        this.context.closePath();
+	      }
+	
+	      this.context.restore();
+	
+	      this.particleCount++;
+	    }
+	  }]);
+	
+	  return Particles;
+	}();
+	
+	exports.default = Particles;
 
 /***/ }
 /******/ ]);

@@ -132,8 +132,6 @@ export default class HaloStep {
       const haloTimeline = new Timeline({
         onStart: () => {
           this.imageElement.timelines.push(haloTimeline);
-          // this.imageElement.createParticles();
-          // this.imageElement.drawParticles();
         },
         onComplete: () => {
           this.imageElement.killTimeline(haloTimeline);
@@ -162,6 +160,7 @@ export default class HaloStep {
           }
         },
         onComplete: () => {
+          this.imageElement.canvasSnapshot = this.context.createPattern(this.canvas, 'no-repeat');
           this.imageElement.killTween(active);
         }
       });

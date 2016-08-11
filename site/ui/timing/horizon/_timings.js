@@ -90,11 +90,11 @@ export const STATES_AURA_SINGLE = [
   },
   {
     NAME: 'animateInHalo',
-    DURATION: 4
+    DURATION: 2
   },
   {
     NAME: 'chrome',
-    DURATION: 2
+    DURATION: 1
   }
 ];
 
@@ -105,10 +105,10 @@ export const STATES_AURA_MULTIPLE = [
   },
   {
     NAME: 'animateInHaloMulti',
-    DURATION: 4
+    DURATION: 2
   },
   {
     NAME: 'chrome',
-    DURATION: 2
+    DURATION: 1
   }
 ];

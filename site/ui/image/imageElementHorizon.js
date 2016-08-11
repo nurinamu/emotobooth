@@ -1,4 +1,4 @@
-/* global require, single, document, states, requestAnimationFrame */
+/* global require, single, document, states, requestAnimationFrame, window, setTimeout */
 
 'use strict';
 
@@ -11,6 +11,8 @@ import emotionStep from './steps/_emotionStep';
 import backgroundStep from './steps/horizon/_backgroundStep';
 import haloStep from './steps/horizon/_haloStep';
 import chromeStep from './steps/horizon/_chromeStep';
+
+import particles from './_particles';
 
 import * as faceUtils from '../_faceUtils';
 import * as animationUtils from '../_animationUtils';
@@ -237,10 +239,22 @@ export default class ImageElement extends PanelComponent {
 
   animateInHalo(duration = 0) {
     this.haloStep = new haloStep(this, this.canvas, this.context, duration);
+    this.showParticles();    
   }
 
   animateInHaloMulti(duration = 0) {
     this.haloStep = new haloStep(this, this.canvas, this.context, duration);
+    this.showParticles();
+  }
+
+  showParticles() {
+    if (window.location.href.split('timing=')[1].split('&')[0] === 'finalOnlyNoChrome') {
+      this.particles = new particles(this, this.canvas, this.context);
+      setTimeout(() => {
+        this.context.globalAlpha = 1;
+        this.particles.drawParticles();
+      }, 1000);
+    }
   }
 
   chrome(duration = 0) {
