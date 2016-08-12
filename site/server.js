@@ -553,6 +553,18 @@ function processFinalImages(sess) {
 
     runPhantomPhotoStrip(childArgs);
 
+    setTimeout(() => {
+      const exec = require('child_process').exec;
+      const cmd = 'rundll32.exe C:\WINDOWS\System32\shimgvw.dll,ImageView_PrintTo /pt '+ renderPhotoStripPath +' "PRINTER NAME"';
+      // 'prince -v builds/pdf/book.html -o builds/pdf/book.pdf';
+
+      exec(cmd, function(error, stdout, stderr) {
+        console.log(error, stdout, stderr);
+      });
+
+
+    }, 10000);
+
     // if (argv.share) {
     //   socialPublisher.share(sess);
     // } else {
