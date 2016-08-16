@@ -3,7 +3,6 @@
 'use strict';
 
 import * as colorUtils from './../_colorUtils';
-// const Tween = require('gsap/src/minified/TweenMax.min.js');
 
 const PARTICLE_COUNT = 7;
 const NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
@@ -28,8 +27,22 @@ export default class Particles {
     this.createParticles();
   }
 
+  kill() {
+    this.killParticles = true;
+    this.imageElement = null;
+    this.particles = null;
+    this.canvas = null;
+    this.context = null;
+  }
+
   calculateWithScale(num) {
-    return num * this.shapeScale;
+    const group = this.imageElement.facesAndEmotions.length !== 1;
+    const radiusScale = this.imageElement.hexR / (225 * this.shapeScale);
+    let total = num * this.shapeScale;
+    if (group && this.imageElement.hexR > 225) {
+      total = (num * radiusScale) * this.shapeScale;
+    }
+    return total;
   }
 
   createParticles() {
@@ -74,7 +87,11 @@ export default class Particles {
     }
   }
 
-drawParticles() {
+  drawParticles() {
+    if (this.killParticles) {
+      return;
+    }
+
     let i = 0;
 
     this.context.save();

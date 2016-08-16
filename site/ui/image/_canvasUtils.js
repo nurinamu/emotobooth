@@ -422,13 +422,14 @@ export default class CanvasUtils {
       }
     }
 
-    colorUtils.NEUTRAL_WHITE
-
     color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
 
-    let baseRadius = BASE_RADIUS;
+    let baseRadius = BASE_RADIUS * this.shapeScale;
     if (group) {
       baseRadius = BASE_GROUP_RADIUS;
+      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
+        baseRadius = this.imageElement.hexR;
+      }
     }
 
     let circleOffset = CIRCLE_OFFSET;
@@ -445,7 +446,7 @@ export default class CanvasUtils {
     this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
     this.imageElement.context.lineTo(0, 0);
 
-    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, Math.PI * 2);
+    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
     this.imageElement.context.fill();
     this.imageElement.context.closePath();
 
@@ -455,9 +456,12 @@ export default class CanvasUtils {
   drawCircle() {
     const group = this.imageElement.facesAndEmotions.length !== 1;
 
-    let baseRadius = BASE_RADIUS;
+    let baseRadius = BASE_RADIUS * this.shapeScale;
     if (group) {
       baseRadius = BASE_GROUP_RADIUS;
+      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
+        baseRadius = this.imageElement.hexR;
+      }
     }
 
     let circleOffset = CIRCLE_OFFSET;
@@ -480,7 +484,7 @@ export default class CanvasUtils {
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.beginPath();
 
-      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius * this.shapeScale, 0, (Math.PI * 2) * perc);
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, (Math.PI * 2) * perc);
 
       this.imageElement.context.stroke();
       this.imageElement.context.restore();
@@ -510,7 +514,10 @@ export default class CanvasUtils {
 
     let baseRadius = BASE_RADIUS * this.shapeScale;
     if (group) {
-      baseRadius = BASE_GROUP_RADIUS * this.shapeScale;
+      baseRadius = BASE_GROUP_RADIUS;
+      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
+        baseRadius = this.imageElement.hexR;
+      }
     }
 
     let circleOffset = CIRCLE_OFFSET;
@@ -544,7 +551,6 @@ export default class CanvasUtils {
         }
 
         Tween.to(this, timing, { circleAnim: 1, delay: 0 });
-        // Tween.to(this, 2, { triangleC: 1, delay: 0, ease: EASING });
       }
 
       // 2

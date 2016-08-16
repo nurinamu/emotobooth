@@ -16,13 +16,19 @@ export default class BackgroundStep {
     this.imageElement = imageElement;
     this.canvas = canvas;
     this.context = context;
-    this.vignettePattern;
 
     this.circleStarted = false;
 
     this.canvasUtils = new canvasUtils(imageElement, canvas, context);
     
     this.animateInBackground(duration);
+  }
+
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
   }
 
   animateInBackgroundFrame(progress = 1) {

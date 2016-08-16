@@ -29,6 +29,13 @@ export default class EmotionStep {
     });
   }
 
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+  }
+
   personalColor(duration = 1) {
     const fillColors = this.imageElement.treatments.personalAuraColors[this.imageElement.currFace];
     this.imageElement.fills = [];

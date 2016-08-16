@@ -19,6 +19,13 @@ export default class HaloStep {
     this.animateInHalo(duration);
   }
 
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+  }
+
   getStrongestColor() {
     const emo = this.imageElement.facesAndStrongestEmotions;
     let strongestEmotion = 0;
@@ -55,6 +62,7 @@ export default class HaloStep {
 
       if(this.imageElement.treatments.treatment) {
         if (this.imageElement.treatments.treatment.halo.outerColor === colorUtils.TRANSPARENT && this.imageElement.treatments.treatment.halo.innerColor ===  colorUtils.TRANSPARENT) {
+          this.canvasUtils.createTopShapes(false, prg);
           return;
         }
       }
@@ -114,7 +122,6 @@ export default class HaloStep {
         this.context.restore();
       }
     }
-
     this.canvasUtils.createTopShapes(false, prg);
   }
 

@@ -17,6 +17,13 @@ export default class FlashStep {
     this.flash(duration);
   }
 
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+  }
+
   flash(duration = 0) {
     const thisTimeline = new Timeline({
       onComplete: () => {

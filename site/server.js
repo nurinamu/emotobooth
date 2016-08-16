@@ -16,7 +16,11 @@ var request = require('request');
 var _ = require('underscore');
 var logger = require('winston');
 var socket = require('socket.io-client')('http://127.0.0.1:8080');
-var CREDENTIALS = require('./credentials.json');
+try {
+  var CREDENTIALS = require('./credentials.json');
+} catch (e) {
+  console.log("No social credentials were found. This is running in local mode only.");
+}
 var emote = require('./emote');
 var sessionImages = {};
 var sessionId = 1;
@@ -32,7 +36,16 @@ logger.level = 'debug';
 
 // Parse args, read config, and configure
 var argv = require('minimist')(process.argv.slice(2));
-var config = require('./config');
+
+try {
+  var config = require('./config');
+} catch (e) {
+  throw "No config.js file found. Please follow the format in config.js.example";
+}
+ 
+if (!config.api_key) {
+  throw "You need an API key in config.js in order to run this program. Please add to config.js";
+}
 
 config.port = argv.p || argv.port || config.port || 8081;
 config.displayPort = argv.displayp || argv.displayport || config.display_port || 8080;
@@ -68,8 +81,9 @@ client.hkeys("image-data", function (err, replies) {
   });
 });
 
-
-let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+if (CREDENTIALS) {
+  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+}
 
 // Define job mapping
 var jobMapping = {
@@ -270,7 +284,9 @@ function sessionComplete(job, finish) {
         //     sess[key].finalPath = `${__dirname}/${sess[key].finalPath}`;
         //   }
         // }
+        // if (argv.share) {
         // //socialPublisher.share(sess);
+        // }
         // sessionIsComplete = false;
       } else {
         console.log('NOT ALL IMAGES HAVE BEEN PROCESSED!');
@@ -552,18 +568,6 @@ function processFinalImages(sess) {
     ];
 
     runPhantomPhotoStrip(childArgs);
-
-    setTimeout(() => {
-      const exec = require('child_process').exec;
-      const cmd = 'rundll32.exe C:\WINDOWS\System32\shimgvw.dll,ImageView_PrintTo /pt '+ renderPhotoStripPath +' "PRINTER NAME"';
-      // 'prince -v builds/pdf/book.html -o builds/pdf/book.pdf';
-
-      exec(cmd, function(error, stdout, stderr) {
-        console.log(error, stdout, stderr);
-      });
-
-
-    }, 10000);
 
     // if (argv.share) {
     //   socialPublisher.share(sess);

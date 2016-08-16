@@ -77,6 +77,9 @@ export default class ImageElement extends PanelComponent {
 
     this.hexVertices = [];
 
+    this.allDone = false;
+    this.shapesInit = false;
+
     this.init();
   }
 
@@ -146,6 +149,22 @@ export default class ImageElement extends PanelComponent {
 
   reinitFaces(json) {
     super.reinitFaces(json, () => {
+      if (this.particles) {
+        this.particles.kill();
+        this.particles = null;
+      }
+
+      const stepsToKill = [this.zoomStep, this.faceStep, this.flashStep, this.emotionStep, this.backgroundStep, this.haloStep, this.chromeStep];
+      stepsToKill.forEach((step) => {
+        if (step) {
+          step.kill();
+          step = null;
+        }
+      });
+
+      this.faceStep = new faceStep(this, this.canvas, this.context);
+      this.zoomStep = new zoomStep(this, this.canvas, this.context);
+
       this.backgroundFill = 'blue';
       this.totalEmotions = 0;
       this.imageScale = 1;
@@ -170,6 +189,9 @@ export default class ImageElement extends PanelComponent {
       this.auraAnimations = null;
       this.offsetX = 0;
       this.offsetY = 0;
+      this.allDone = false;
+      this.currentFrame = 0;
+      this.shapesInit = false;
     });
   }
 
@@ -248,12 +270,15 @@ export default class ImageElement extends PanelComponent {
   }
 
   showParticles() {
-    if (window.location.href.split('timing=')[1].split('&')[0] === 'finalOnlyNoChrome') {
-      this.particles = new particles(this, this.canvas, this.context);
-      setTimeout(() => {
-        this.context.globalAlpha = 1;
-        this.particles.drawParticles();
-      }, 1000);
+    const checkTiming = window.location.href.split('timing=');
+    if (checkTiming.length > 1) {
+      if (checkTiming[1].split('&')[0] === 'finalOnlyNoChrome') {
+        this.particles = new particles(this, this.canvas, this.context);
+        setTimeout(() => {
+          this.context.globalAlpha = 1;
+          this.particles.drawParticles();
+        }, 1000);
+      }
     }
   }
 

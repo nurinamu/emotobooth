@@ -18,6 +18,14 @@ export default class ZoomStep {
     this.pointUtils = new pointUtils(imageElement);
   }
 
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+    this.pointUtils = null;
+  }
+
   zoom(duration = 1, zoomOut = false) {
     const topLeft = new geometryUtils.Point(utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].x), utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].y));
 

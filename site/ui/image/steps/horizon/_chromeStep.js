@@ -1,4 +1,4 @@
-/* global require, single, Image, requestAnimationFrame, window, setTimeout */
+/* global require, single, Image, requestAnimationFrame, setTimeout */
 
 'use strict';
 
@@ -31,12 +31,23 @@ export default class ChromeStep {
     this.chrome(duration);
   }
 
+  kill() {
+    this.killAnimation = true;
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+  }
+
   chrome(duration = 2) {
     this.particles = new particles(this.imageElement, this.canvas, this.context);
     this.drawChrome(duration);
   }
 
   drawParticles() {
+    if (this.killAnimation) {
+      return;
+    }
     requestAnimationFrame(this.drawParticles.bind(this));
     this.canvasUtils.redrawCurrentCanvas();
     if (this.imageElement.totalEmotions > 0) {
@@ -58,6 +69,9 @@ export default class ChromeStep {
   }
 
   drawChrome(duration = 2) {
+    if (this.killAnimation) {
+      return;
+    }
     let height = 0;
     if (single) {
       height = animationUtils.CHROME_SHORT_HEIGHT;
@@ -66,6 +80,9 @@ export default class ChromeStep {
     }
     if (duration === 0) {
       this.imageElement.ifNotDrawing(() => {
+        if (!this.imageElement || !this.imageElement.totalEmotions) {
+          return;
+        }
         if (this.imageElement.totalEmotions > 0) {
           this.drawChromeFrame(1, height, () => {
             let tick = 0;

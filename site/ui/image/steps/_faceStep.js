@@ -19,6 +19,14 @@ export default class FaceStep {
     this.pointUtils = new pointUtils(imageElement);
   }
 
+  kill() {
+    this.imageElement = null;
+    this.canvas = null;
+    this.context = null;
+    this.canvasUtils = null;
+    this.pointUtils = null;
+  }
+
   ears(duration = 0) {
     this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EARS), duration);
   }
