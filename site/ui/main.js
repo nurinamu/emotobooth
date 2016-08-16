@@ -11,6 +11,7 @@ let zoom = false;
 let controls = false;
 let showGrid = false;
 let prepopulate = false;
+let dontPrint = false;
 
 const panels = [];
 let oldestPanel = null;
@@ -197,6 +198,12 @@ function setValuesBasedOnQueryStrings() {
   showGrid = window.location.href.includes('showgrid');
   eventName = !window.location.href.includes('event') ? 'horizon' : window.location.href.split('event=')[1].split('&')[0].split('?')[0];
   timingsType = !window.location.href.includes('timing') ? 'normal' : window.location.href.split('timing=')[1].split('&')[0];
+  dontPrint = window.location.href.includes('dontprint');
+
+  // If dontPrint is true, send it to server.js
+  if (dontPrint) {
+    socket.emit('dontprint', {});
+  }
 
   if (timingsType === 'noChrome' && window.location.pathname.includes('single')) {
     timingsType = 'finalOnlyNoChrome';

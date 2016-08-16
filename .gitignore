@@ -11,6 +11,7 @@ site/out-print
 site/out
 deploy/.vagrant
 src/node_modules
+CaptureOne/
 .*.swp
 .DS_Store
 npm-debug.log

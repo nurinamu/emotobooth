@@ -31,6 +31,7 @@ var http = require('http');
 var socketIO = require('socket.io');
 var phantomjs = require('phantomjs-prebuilt')
 var phantomBinPath = phantomjs.path;
+var dontPrint = false;
 
 logger.level = 'debug';
 
@@ -496,16 +497,18 @@ function finishedImage(job, finish) {
 connectJob('finishedImage', finishedImage);
 
 function runPhantomPhotoStrip(childArgs) {
-  cp.execFile(phantomBinPath, childArgs,
-    (err, stdout, stderr) => {
-      console.log(err, stdout, stderr);
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('completed');
+  if (!dontPrint) {
+    cp.execFile(phantomBinPath, childArgs,
+      (err, stdout, stderr) => {
+        console.log(err, stdout, stderr);
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('completed');
+        }
       }
-    }
-  )
+    )
+  }
 }
 
 function processFinalImages(sess) {
@@ -649,7 +652,7 @@ function runPhantom(childArgs, incompleteSession) {
 chokidar.watch(config.inDir, {
   ignoreInitial: true,
   usePolling: true,
-  ignored: /CaptureOne/
+  ignored: [/CaptureOne/, /[\/\\]\./]
 })
 .on('ready', function() {
   logger.info(sprintf('watching %s for new files', config.inDir));
@@ -658,7 +661,10 @@ chokidar.watch(config.inDir, {
   setTimeout(() => {
     var stat = fs.statSync(imagePath);
     console.log('SIZE OF IMAGEPATH: ', stat.size);
-    newImage(imagePath)
+
+    console.log(imagePath, stat);
+
+    newImage(imagePath);
   }, 1000);
 });
 
@@ -794,6 +800,12 @@ io.on('connection', function(socket) {
     callNextJobs('sessionEnd', {
       id: uuid.v4()
     });
+  });
+
+  // If told not to print from the URL
+  socket.on('dontprint', (data) => {
+    console.log('dont print!!!!');
+    dontPrint = true;
   });
 
   socket.on('killSession', (data) => {
