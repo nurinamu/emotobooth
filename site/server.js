@@ -66,9 +66,9 @@ checkDirs.forEach((dir) => {
 });
 
 // Remove all files currently contained within the `in` directory
-fs.readdir(config.inDir, function(err,files) {
-  files.forEach((file) => fs.unlink(config.inDir + file));
-})
+// fs.readdir(config.inDir, function(err,files) {
+//   files.forEach((file) => fs.unlink(config.inDir + file));
+// })
 
 // Create job queue
 var queue = kue.createQueue();
@@ -497,6 +497,7 @@ function finishedImage(job, finish) {
 connectJob('finishedImage', finishedImage);
 
 function runPhantomPhotoStrip(childArgs) {
+  console.log("DONT PRINT ", dontPrint);
   if (!dontPrint) {
     cp.execFile(phantomBinPath, childArgs,
       (err, stdout, stderr) => {
@@ -652,7 +653,7 @@ function runPhantom(childArgs, incompleteSession) {
 chokidar.watch(config.inDir, {
   ignoreInitial: true,
   usePolling: true,
-  ignored: [/CaptureOne/, /[\/\\]\./]
+  ignored: /CaptureOne/
 })
 .on('ready', function() {
   logger.info(sprintf('watching %s for new files', config.inDir));

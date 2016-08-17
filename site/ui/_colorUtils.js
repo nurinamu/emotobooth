@@ -38,10 +38,14 @@ export const WHITE = 'rgba(255, 255, 255, 1)';
 export const BLACK = 'rgba(0, 0, 0, 1)';
 
 export const CERTAINTY_ALPHAS = {
-  VERY_UNLIKELY: 0,
-  UNLIKELY: 50,
-  POSSIBLE: 70,
-  LIKELY: 90,
+  // VERY_UNLIKELY: 0,
+  // UNLIKELY: 50,
+  // POSSIBLE: 70,
+  // LIKELY: 90,
+  VERY_UNLIKELY: 100,
+  UNLIKELY: 100,
+  POSSIBLE: 100,
+  LIKELY: 100,
   VERY_LIKELY: 100
 };
 

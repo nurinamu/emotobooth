@@ -14,7 +14,7 @@ import {
 
 const Tween = require('gsap/src/minified/TweenMax.min.js');
 
-const BASE_RADIUS = 115;
+const BASE_RADIUS = 135;
 const BASE_GROUP_RADIUS = 225;
 const CIRCLE_OFFSET = 30;
 const CIRCLE_GROUP_OFFSET = 75;
@@ -421,6 +421,8 @@ export default class CanvasUtils {
         EMO_COLOR = this.imageElement.treatments.treatment.background;
       }
     }
+
+    window.console.log(EMO_COLOR);
 
     color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
 

@@ -117,9 +117,9 @@ export function generateSinglePersonTreatment(person) {
       vignetteOuterColor = colorUtils.generateColorFromIndex(vignetteOuterIndex, emotions);
     }
 
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
-      backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
-    }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
+    //   backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
+    // }
 
     haloInnerColor = colorUtils.generateColorFromIndex(haloInnerIndex, emotions);
     haloOuterColor = haloInnerColor;
@@ -129,14 +129,14 @@ export function generateSinglePersonTreatment(person) {
 
     haloInnerColor = colorUtils.subAlpha(haloInnerColor, 0.75);
 
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
-      haloInnerColor = colorUtils.TRANSPARENT;
-    }
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
-      haloOuterColor = colorUtils.TRANSPARENT;
-    } else {
-      haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
-    }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
+    //   haloInnerColor = colorUtils.TRANSPARENT;
+    // }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
+    //   haloOuterColor = colorUtils.TRANSPARENT;
+    // } else {
+    haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
+    // }
   }
 
   haloRadius = CERTAINTY_HALO_RADII[person[emotions[haloInnerIndex]]];

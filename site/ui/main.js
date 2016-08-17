@@ -202,6 +202,7 @@ function setValuesBasedOnQueryStrings() {
 
   // If dontPrint is true, send it to server.js
   if (dontPrint) {
+    window.console.log('dont print')
     socket.emit('dontprint', {});
   }
 
