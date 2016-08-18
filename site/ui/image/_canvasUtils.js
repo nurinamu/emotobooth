@@ -12,13 +12,16 @@ import {
   TOTAL_CIRCLE_FRAMES
 } from './_imageConst';
 
+import {getStrongestColor} from './../_animationUtils';
+
 const Tween = require('gsap/src/minified/TweenMax.min.js');
 
 const BASE_RADIUS = 135;
 const BASE_GROUP_RADIUS = 225;
+const MAX_GROUP_RADIUS = 390;
 const CIRCLE_OFFSET = 30;
 const CIRCLE_GROUP_OFFSET = 75;
-const NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
+const LINE_WIDTH = 2;
 
 export default class CanvasUtils {
   constructor(imageElement) {
@@ -43,6 +46,8 @@ export default class CanvasUtils {
 
         return dpr / bsr;
     })();
+
+    this.isGroup = this.imageElement.facesAndEmotions.length !== 1;
   }
 
   retraceCanvas() {
@@ -350,6 +355,31 @@ export default class CanvasUtils {
     this.imageElement.context.restore();
   }
 
+  cutOutCircle(closePath = true) {
+    const baseRadius = this.getBaseRadius();
+
+    let circleOffset = CIRCLE_OFFSET;
+    if (this.isGroup) {
+      circleOffset = CIRCLE_GROUP_OFFSET;
+    }
+
+    this.imageElement.context.save();
+
+    this.imageElement.context.beginPath();
+    this.imageElement.context.moveTo(0, 0);
+    this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
+    this.imageElement.context.lineTo(this.imageElement.canvasWidth, this.imageElement.canvasHeight);
+    this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
+    this.imageElement.context.lineTo(0, 0);
+
+    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+
+    if (closePath) {
+      this.imageElement.context.closePath();
+    }
+    this.imageElement.context.restore();
+  }
+
   fillBackground() {
     this.imageElement.context.fillStyle = this.imageElement.backgroundFill;
     this.imageElement.context.globalAlpha = 1;
@@ -403,44 +433,53 @@ export default class CanvasUtils {
     return gradient;
   }
 
-  createShapeBackground(opacity) {
+  getBaseRadius() {
+    let baseRadius = BASE_RADIUS * this.shapeScale;
+    if (this.isGroup) {
+      baseRadius = BASE_GROUP_RADIUS;
+      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
+        baseRadius = this.imageElement.hexR;
+      }
+      if (baseRadius > MAX_GROUP_RADIUS) {
+        baseRadius = MAX_GROUP_RADIUS;
+      }
+    }
+
+    return baseRadius;
+  }
+
+  createShapeBackground(opacityProgress) {
+    // const opacity = opacityProgress * 0.75;
+    const opacity = opacityProgress;
     this.imageElement.context.save();
     this.imageElement.context.moveTo(0, 0);
     this.imageElement.context.translate(0, 0);
 
-    const group = this.imageElement.facesAndEmotions.length !== 1;
-
+    const group = this.isGroup;
     let color = null;
 
     let EMO_COLOR = colorUtils.NEUTRAL;
     if (!this.imageElement.noEmotions) {
       if (group) {
-        const gradientColors = this.imageElement.treatments.groupAuraColors;
-        EMO_COLOR = gradientColors[0];
+        EMO_COLOR = getStrongestColor(this.imageElement)[0];
       } else {
         EMO_COLOR = this.imageElement.treatments.treatment.background;
       }
     }
 
-    window.console.log(EMO_COLOR);
-
     color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
 
-    let baseRadius = BASE_RADIUS * this.shapeScale;
-    if (group) {
-      baseRadius = BASE_GROUP_RADIUS;
-      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-        baseRadius = this.imageElement.hexR;
-      }
-    }
+    const baseRadius = this.getBaseRadius();
 
     let circleOffset = CIRCLE_OFFSET;
     if (group) {
       circleOffset = CIRCLE_GROUP_OFFSET;
     }
 
+    const fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false); // 0.45, 0.5 // 0.3, 0.4
+
     this.imageElement.context.globalCompositeOperation = 'screen';
-    this.imageElement.context.fillStyle = color;
+    this.imageElement.context.fillStyle = fillColor;
     this.imageElement.context.beginPath();
     this.imageElement.context.moveTo(0, 0);
     this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
@@ -455,23 +494,33 @@ export default class CanvasUtils {
     this.imageElement.context.restore();
   }
 
-  drawCircle() {
-    const group = this.imageElement.facesAndEmotions.length !== 1;
-
-    let baseRadius = BASE_RADIUS * this.shapeScale;
-    if (group) {
-      baseRadius = BASE_GROUP_RADIUS;
-      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-        baseRadius = this.imageElement.hexR;
+  getEmoColor() {
+    const darken = -0.1;
+    const alpha = 0.8;
+    let emoColor;
+    if (this.imageElement.noEmotions) {
+      emoColor = colorUtils.NEUTRAL;
+    } else {
+      if (this.isGroup) {
+        emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(getStrongestColor(this.imageElement)[0], darken), alpha);
+      } else {
+        emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(this.imageElement.treatments.treatment.halo.outerColor, darken), alpha);
       }
     }
+    return emoColor;
+  }
+
+  drawCircle() {
+    const group = this.isGroup;
+
+    const baseRadius = this.getBaseRadius();
+
+    const emoColor = this.getEmoColor();
 
     let circleOffset = CIRCLE_OFFSET;
     if (group) {
-      circleOffset = CIRCLE_GROUP_OFFSET;
+      circleOffset = CIRCLE_GROUP_OFFSET; 
     }
-
-    const emoColor = NEUTRAL_LINE_COLOR;
 
     this.imageElement.context.save();
 
@@ -481,8 +530,9 @@ export default class CanvasUtils {
       requestAnimationFrame(this.drawCircle.bind(this));
 
       this.imageElement.context.save();
+      this.imageElement.context.globalCompositeOperation = 'source-over';
       this.imageElement.context.strokeStyle = emoColor;
-      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.beginPath();
 
@@ -499,33 +549,27 @@ export default class CanvasUtils {
   }
 
   createTopShapes(single, progress) {
-    const group = this.imageElement.facesAndEmotions.length !== 1;
-    const emoColor = NEUTRAL_LINE_COLOR;
+    const group = this.isGroup;
+    const blendMode = 'source-over';
 
     this.imageElement.context.save();
-
     this.imageElement.context.translate(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y);
 
-    this.imageElement.context.globalCompositeOperation = 'source-over';
-
-    this.imageElement.context.restore();
-    this.imageElement.context.save();
-    this.imageElement.context.translate(0, 0);
-    this.imageElement.context.strokeStyle = emoColor;
-    this.imageElement.context.lineWidth = this.shapeScale;
-
-    let baseRadius = BASE_RADIUS * this.shapeScale;
-    if (group) {
-      baseRadius = BASE_GROUP_RADIUS;
-      if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-        baseRadius = this.imageElement.hexR;
-      }
-    }
+    const emoColor = this.getEmoColor();
 
     let circleOffset = CIRCLE_OFFSET;
     if (group) {
       circleOffset = CIRCLE_GROUP_OFFSET;
     }
+
+    this.imageElement.context.restore();
+    this.imageElement.context.save();
+    this.imageElement.context.translate(0, 0);
+    this.imageElement.context.strokeStyle = emoColor;
+    this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+    this.imageElement.context.globalCompositeOperation = blendMode;
+
+    const baseRadius = this.getBaseRadius();
 
     this.imageElement.context.beginPath();
     this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
@@ -561,12 +605,13 @@ export default class CanvasUtils {
       this.imageElement.context.save();
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.strokeStyle = emoColor;
-      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+      this.imageElement.context.globalCompositeOperation = blendMode;
 
       let randomOffset = this.imageElement.randomizedArcs[0];
 
       this.imageElement.context.beginPath();
-      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 10, randomOffset, randomOffset + (this.circleAnim * Math.PI));
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 15, randomOffset, randomOffset + (this.circleAnim * Math.PI));
       this.imageElement.context.stroke();
 
       // 3
@@ -577,10 +622,11 @@ export default class CanvasUtils {
       this.imageElement.context.save();
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.strokeStyle = emoColor;
-      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+      this.imageElement.context.globalCompositeOperation = blendMode;
 
       this.imageElement.context.beginPath();
-      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 30, randomOffset, randomOffset + (this.circleAnim * (Math.PI * 0.5)));
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 35, randomOffset, randomOffset + (this.circleAnim * (Math.PI * 0.5)));
       this.imageElement.context.stroke();
 
       // 4
@@ -591,10 +637,11 @@ export default class CanvasUtils {
       this.imageElement.context.save();
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.strokeStyle = emoColor;
-      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+      this.imageElement.context.globalCompositeOperation = blendMode;
 
       this.imageElement.context.beginPath();
-      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + (-(0.1 * Math.PI)), randomOffset + (this.circleAnim * (Math.PI * 0.7)));
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 55, randomOffset + (-(0.1 * Math.PI)), randomOffset + (this.circleAnim * (Math.PI * 0.7)));
       this.imageElement.context.stroke();
 
       // 5
@@ -603,10 +650,11 @@ export default class CanvasUtils {
       this.imageElement.context.save();
       this.imageElement.context.translate(0, 0);
       this.imageElement.context.strokeStyle = emoColor;
-      this.imageElement.context.lineWidth = this.shapeScale;
+      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+      this.imageElement.context.globalCompositeOperation = blendMode;
 
       this.imageElement.context.beginPath();
-      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + (0.8 * Math.PI), randomOffset + (0.8 * Math.PI + (this.circleAnim * Math.PI)));
+      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 55, randomOffset + (0.8 * Math.PI), randomOffset + (0.8 * Math.PI + (this.circleAnim * Math.PI)));
       this.imageElement.context.stroke();
    }
 

@@ -93,6 +93,22 @@ export function chooseRandomColorFromEmotion(emotion = null) {
   return color;
 }
 
+export function shadeRGBColor(color, percent) {
+  const f = color.split(",");
+  const sliceCount = f[0].includes('rgba') === true ? 5 : 4;
+  const t = percent < 0 ? 0 : 255;
+  const p = percent < 0 ? percent *- 1 : percent;
+  const R = parseInt(f[0].slice(sliceCount));
+  const G = parseInt(f[1]);
+  const B = parseInt(f[2]);
+  let returnVal = `rgba(${ (Math.round((t-R)*p)+R) },${ (Math.round((t-G)*p)+G) }, ${ (Math.round((t-B)*p)+B) }, 1)`
+  if (sliceCount === 4) {
+    returnVal = `rgb(${ (Math.round((t-R)*p)+R) },${ (Math.round((t-G)*p)+G) }, ${ (Math.round((t-B)*p)+B) })`
+  }
+  return returnVal;
+}
+
+
 export function getRandomColorWithAlpha(keyVal = null, key = null, val = null) {
 
   const keyToUse = key ? key : Object.keys(keyVal)[0];

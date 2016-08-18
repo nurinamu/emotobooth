@@ -12,6 +12,9 @@ import backgroundStep from './steps/horizon/_backgroundStep';
 import haloStep from './steps/horizon/_haloStep';
 import chromeStep from './steps/horizon/_chromeStep';
 
+import groupCircleStep from './steps/horizon/_groupCircleStep';
+import multiAuraStep from './steps/horizon/_multiAuraStep';
+
 import particles from './_particles';
 
 import * as faceUtils from '../_faceUtils';
@@ -256,16 +259,20 @@ export default class ImageElement extends PanelComponent {
   }
 
   animateInBackground(duration = 0) {
-    this.backgroundStep = new backgroundStep(this, this.canvas, this.context, duration);
+    if (this.facesAndEmotions.length !== 1) {
+      this.groupCircleStep = new groupCircleStep(this, this.canvas, this.context, duration);
+    } else {
+      this.backgroundStep = new backgroundStep(this, this.canvas, this.context, duration);
+    }
   }
 
   animateInHalo(duration = 0) {
     this.haloStep = new haloStep(this, this.canvas, this.context, duration);
-    this.showParticles();    
+    this.showParticles(); 
   }
 
   animateInHaloMulti(duration = 0) {
-    this.haloStep = new haloStep(this, this.canvas, this.context, duration);
+    this.multiAuraStep = new multiAuraStep(this, this.canvas, this.context, duration);
     this.showParticles();
   }
 

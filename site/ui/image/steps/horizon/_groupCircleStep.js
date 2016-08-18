@@ -2,7 +2,6 @@
 
 'use strict';
 
-import * as ease from './../../../_easings';
 import canvasUtils from './../../_canvasUtils';
 
 import {
@@ -11,7 +10,7 @@ import {
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
-export default class BackgroundStep {
+export default class CircleStep {
   constructor(imageElement, canvas, context, duration) {
     this.imageElement = imageElement;
     this.canvas = canvas;
@@ -21,7 +20,7 @@ export default class BackgroundStep {
 
     this.canvasUtils = new canvasUtils(imageElement, canvas, context);
     
-    this.animateInBackground(duration);
+    this.animateInCircle(duration);
   }
 
   kill() {
@@ -31,14 +30,7 @@ export default class BackgroundStep {
     this.canvasUtils = null;
   }
 
-  animateInBackgroundFrame(progress = 1) {
-    this.context.save();
-
-    this.canvasUtils.redrawBaseImage();
-
-    this.canvasUtils.createShapeBackground(progress);
-
-    
+  animateInCircleFrame(progress = 1) {
     if (!this.circleStarted && progress !== 1) {
       this.circleStarted = true;
       this.canvasUtils.drawCircle();
@@ -47,16 +39,12 @@ export default class BackgroundStep {
         this.canvasUtils.createTopShapes(true, 0);
       }
     }
-
-    this.context.restore();
   }
 
-  animateInBackground(duration = 1) {
-    const rEnd = this.canvas.width;
-
+  animateInCircle(duration = 1) {
     if (duration === 0) {
       this.imageElement.ifNotDrawing(() => {
-        this.animateInBackgroundFrame(1, rEnd);
+        this.animateInCircleFrame(1);
       });
     } else {
       let active = null;
@@ -70,9 +58,7 @@ export default class BackgroundStep {
         }
       });
 
-      const rStart = this.imageElement.hexR;
       let progress = 0;
-      let currR = rStart;
 
       backgroundTimeline.to(this.canvas, duration, {
         onStart: () => {
@@ -81,8 +67,7 @@ export default class BackgroundStep {
         },
         onUpdate: () => {
           progress = active.progress();
-          currR = ease.exp(rStart, rEnd, progress);
-          this.animateInBackgroundFrame(progress, currR);
+          this.animateInCircleFrame(progress);
         },
         onComplete: () => {
           this.imageElement.killTween(active);

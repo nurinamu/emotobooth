@@ -5,7 +5,7 @@
 import * as ease from './../../../_easings';
 import * as colorUtils from './../../../_colorUtils';
 import canvasUtils from './../../_canvasUtils';
-import {EMOTION_STRENGTHS} from './../../../_emotionUtils';
+import {getStrongestColor} from './../../../_animationUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
@@ -26,37 +26,13 @@ export default class HaloStep {
     this.canvasUtils = null;
   }
 
-  getStrongestColor() {
-    const emo = this.imageElement.facesAndStrongestEmotions;
-    let strongestEmotion = 0;
-
-    const strength1 = EMOTION_STRENGTHS[emo[0][Object.keys(emo[0])[0]]];
-    const strength2 = EMOTION_STRENGTHS[emo[1][Object.keys(emo[1])[0]]];
-    
-    if (strength2 > strength1) {
-      strongestEmotion = 1;
-    }
-
-    let returnColor;
-
-    returnColor = this.imageElement.treatments.personalAuraColors[strongestEmotion][0];
-
-    if(returnColor === 'rgba(34, 45, 51, 1)') {
-      const changeTo = (strongestEmotion === 1) ? 0 : 1;
-      returnColor = this.imageElement.treatments.personalAuraColors[changeTo][0];
-    }
-
-    return returnColor;
-  }
-
   animateInHaloFrame(prg = 1) {
     const progress = prg / 2;
-    const gradientColors = this.imageElement.treatments.personalAuraColors;
     const group = this.imageElement.facesAndEmotions.length !== 1;
 
     this.canvasUtils.redrawBaseImage();
     this.context.save();
-    this.canvasUtils.createShapeBackground(0.75);
+    this.canvasUtils.createShapeBackground(1);
 
     if (!this.imageElement.noEmotions) {
 
@@ -71,11 +47,12 @@ export default class HaloStep {
         const alpha = ease.expOut(0, 0.5, progress);
         const r = ease.expOut(this.canvas.height * 0.1, this.canvas.height * 1.6, progress);
 
-        const gradient = this.context.createRadialGradient(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, this.imageElement.hexR, this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, r);
+        const gradient = this.context.createRadialGradient(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, this.imageElement.hexR - 125, this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, r);
 
         if (group) {
-          gradient.addColorStop(0, this.getStrongestColor());
+          gradient.addColorStop(0, getStrongestColor(this.imageElement)[1]);
         } else {
+          // gradient.addColorStop(0, colorUtils.TRANSPARENT);
           gradient.addColorStop(0, this.imageElement.treatments.treatment.halo.innerColor);
 
           if (this.imageElement.treatments.treatment.halo.outerColor !== colorUtils.TRANSPARENT) {
@@ -96,9 +73,9 @@ export default class HaloStep {
         const r = ease.expOut(0.1, 1.2, progress);
 
         if (group) {
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(gradientColors[0][0], colorUtils.TRANSPARENT, r, false);
+          this.context.fillStyle = this.canvasUtils.createSimpleGradient(getStrongestColor(this.imageElement)[0], colorUtils.TRANSPARENT, r, false);
         } else {
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.outerColor, colorUtils.TRANSPARENT, r, false);
+          this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, r, false);
         }
 
         this.context.globalCompositeOperation = 'source-over';
@@ -110,14 +87,10 @@ export default class HaloStep {
         let r2;
         if (group) {
           r2 = ease.expOut(0, (this.imageElement.hexR * (3) / this.canvas.height), progress);
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(gradientColors[1][0], 1), colorUtils.TRANSPARENT, r2, false, 0.4, 1);
-        } else {
-          r2 = ease.expOut(0, (this.imageElement.hexR * (Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.radius : 3) / this.canvas.height), progress);
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(this.imageElement.treatments.treatment.halo.innerColor, Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.alpha : 1), colorUtils.TRANSPARENT, r2, false, 0.3, 1);
+          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(getStrongestColor(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false); // 0.4, 1
+          this.context.globalAlpha = alpha2;
+          this.context.fill();
         }
-
-        this.context.globalAlpha = alpha2;
-        this.context.fill();
 
         this.context.restore();
       }

@@ -78,7 +78,7 @@ var client = redisPromises.createClient();
 client.hkeys("image-data", function (err, replies) {
   replies.forEach(function (reply, i) {
     // delete all historical images
-    // client.del('image-data', reply);
+    client.del('image-data', reply);
   });
 });
 

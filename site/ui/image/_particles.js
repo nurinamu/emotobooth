@@ -3,9 +3,9 @@
 'use strict';
 
 import * as colorUtils from './../_colorUtils';
+import {getStrongestColor} from './../_animationUtils';
 
 const PARTICLE_COUNT = 7;
-const NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
 
 export default class Particles {
   constructor(imageElement, canvas, context) {
@@ -37,7 +37,10 @@ export default class Particles {
 
   calculateWithScale(num) {
     const group = this.imageElement.facesAndEmotions.length !== 1;
-    const radiusScale = this.imageElement.hexR / (225 * this.shapeScale);
+    let radiusScale = this.imageElement.hexR / (225 * this.shapeScale);
+    if (radiusScale > 390 * this.shapeScale) {
+      radiusScale = 390 * this.shapeScale;
+    }
     let total = num * this.shapeScale;
     if (group && this.imageElement.hexR > 225) {
       total = (num * radiusScale) * this.shapeScale;
@@ -96,8 +99,21 @@ export default class Particles {
 
     this.context.save();
 
-    const emoColor = NEUTRAL_LINE_COLOR;
-    const color = colorUtils.subAlpha(emoColor, this.particleFade * .3);
+    let emoColor;
+    const darken = -0.1;
+    const alpha = 0.8;
+
+    if (this.imageElement.noEmotions) {
+      emoColor = colorUtils.NEUTRAL;
+    } else {
+      if (this.imageElement.facesAndEmotions.length !== 1) {
+        emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(getStrongestColor(this.imageElement)[0], darken), alpha);
+      } else {
+        emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(this.imageElement.treatments.treatment.halo.outerColor, darken), alpha);
+      }
+    }
+
+    const color = colorUtils.subAlpha(emoColor, this.particleFade);
 
     this.context.fillStyle = color;
 

@@ -9,6 +9,8 @@ import {
   BACKEND_CANVAS_WIDTH
 } from './image/_imageConst';
 
+import {EMOTION_STRENGTHS} from './_emotionUtils';
+
 export const HEX_LOWER_MIN_VERTICAL_MARGIN = 10;
 export const HEX_UPPER_MIN_VERTICAL_MARGIN = 30;
 export const HEX_MIN_BOTTOM_VERTICAL_MARGIN = 180;
@@ -71,6 +73,47 @@ export const CERTAINTY_HALO_RADII = {
   VERY_LIKELY: 1.5
 };
 
+export function getStrongestColor(imageElement) {
+  const emo = imageElement.facesAndStrongestEmotions;
+  const emotionStrengths = [];
+  const returnColors = [];
+
+  function compareStrength(a,b) {
+    if (a.strength < b.strength)
+      return 1;
+    if (a.strength > b.strength)
+      return -1;
+    return 0;
+  }
+
+  emo.forEach((emotions, index) => {
+    let strength = EMOTION_STRENGTHS[emo[index][Object.keys(emo[index])[0]]];
+    if (!strength) strength = 0;
+    const emoObj = {index:index, strength: strength};
+    emotionStrengths.push(emoObj);
+  });
+
+  // Sort people by strength of emotion
+  emotionStrengths.sort(compareStrength);
+
+  emotionStrengths.forEach((item, index) => {
+    const personIndex = emotionStrengths[index].index;
+    const color = imageElement.treatments.personalAuraColors[personIndex][0];
+    if(color !== colorUtils.NEUTRAL) {
+      returnColors.push(imageElement.treatments.personalAuraColors[personIndex][0]);
+    }
+  });
+
+  return returnColors;
+      
+  // This was so if a person had 2 emotions, and the other had none, it would use the first persons strongest emotion
+  // returnColor = imageElement.treatments.personalAuraColors[strongestEmotion][0];
+  // if(returnColor === 'rgba(34, 45, 51, 1)') {
+  //   const changeTo = (strongestEmotion === 1) ? 0 : 1;
+  //   returnColor = imageElement.treatments.personalAuraColors[changeTo][0];
+  // }
+  // return returnColor;
+}
 
 export function generateSinglePersonTreatment(person) {
   const emotions = Object.keys(person);
@@ -87,7 +130,7 @@ export function generateSinglePersonTreatment(person) {
 
   let haloRadius = 1;
 
-  let backgroundColor = colorUtils.generateColorFromIndex(backgroundIndex, emotions);
+  const backgroundColor = colorUtils.generateColorFromIndex(backgroundIndex, emotions);
 
   let vignetteInnerColor = null;
   let vignetteOuterColor = null;
