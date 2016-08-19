@@ -12,7 +12,7 @@ page.open('http://localhost:8080/photostrips/?inPath='+escape(args[1])+'&images=
     setTimeout(function() {
       page.render(args[2], {format: 'jpeg', quality: '100'});
       phantom.exit();
-    }, 4000);
+    }, 1000);
   } else {
     console.log(status);
     phantom.exit();
