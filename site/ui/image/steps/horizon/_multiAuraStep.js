@@ -11,10 +11,6 @@ import canvasUtils from './../../_canvasUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min.js');
 
-import {
-  TOTAL_CIRCLE_FRAMES
-} from './../../_imageConst';
-
 export default class MultiAuraStep {
   constructor(imageElement, canvas, context, duration) {
     this.imageElement = imageElement;

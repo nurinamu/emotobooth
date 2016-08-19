@@ -443,6 +443,7 @@ export default class CanvasUtils {
       if (baseRadius > MAX_GROUP_RADIUS) {
         baseRadius = MAX_GROUP_RADIUS;
       }
+      baseRadius = baseRadius * this.shapeScale;
     }
 
     return baseRadius;

@@ -50,7 +50,7 @@
 	
 	__webpack_require__(2);
 	
-	__webpack_require__(59);
+	__webpack_require__(61);
 
 
 /***/ },
@@ -116,11 +116,11 @@
 	
 	var _panel2 = _interopRequireDefault(_panel);
 	
-	var _threeup = __webpack_require__(36);
+	var _threeup = __webpack_require__(38);
 	
 	var _threeup2 = _interopRequireDefault(_threeup);
 	
-	var _controls = __webpack_require__(37);
+	var _controls = __webpack_require__(39);
 	
 	var _controls2 = _interopRequireDefault(_controls);
 	
@@ -303,19 +303,19 @@
 	
 	function loadStatesAndTimes() {
 	  if (timingsType === 'fast') {
-	    window.states = __webpack_require__(38)("./" + eventName + '/_timings-fast.js');
+	    window.states = __webpack_require__(40)("./" + eventName + '/_timings-fast.js');
 	  } else if (timingsType === 'finalOnly') {
-	    window.states = __webpack_require__(41)("./" + eventName + '/_timings-finalOnly.js');
+	    window.states = __webpack_require__(43)("./" + eventName + '/_timings-finalOnly.js');
 	  } else if (timingsType === 'noFace') {
-	    window.states = __webpack_require__(44)("./" + eventName + '/_timings-noFace.js');
+	    window.states = __webpack_require__(46)("./" + eventName + '/_timings-noFace.js');
 	  } else if (timingsType === 'noAura') {
-	    window.states = __webpack_require__(47)("./" + eventName + '/_timings-noAura.js');
+	    window.states = __webpack_require__(49)("./" + eventName + '/_timings-noAura.js');
 	  } else if (timingsType === 'noChrome') {
-	    window.states = __webpack_require__(50)("./" + eventName + '/_timings-noChrome.js');
+	    window.states = __webpack_require__(52)("./" + eventName + '/_timings-noChrome.js');
 	  } else if (timingsType === 'finalOnlyNoChrome') {
-	    window.states = __webpack_require__(53)("./" + eventName + '/_timings-finalOnlyNoChrome.js');
+	    window.states = __webpack_require__(55)("./" + eventName + '/_timings-finalOnlyNoChrome.js');
 	  } else {
-	    window.states = __webpack_require__(56)("./" + eventName + '/_timings.js');
+	    window.states = __webpack_require__(58)("./" + eventName + '/_timings.js');
 	  }
 	}
 	
@@ -329,6 +329,7 @@
 	
 	  // If dontPrint is true, send it to server.js
 	  if (dontPrint) {
+	    window.console.log('dont print');
 	    socket.emit('dontprint', {});
 	  }
 	
@@ -449,7 +450,7 @@
 	
 	var _imageElementHorizon2 = _interopRequireDefault(_imageElementHorizon);
 	
-	var _jsonElement = __webpack_require__(35);
+	var _jsonElement = __webpack_require__(37);
 	
 	var _jsonElement2 = _interopRequireDefault(_jsonElement);
 	
@@ -1607,6 +1608,7 @@
 	  value: true
 	});
 	exports.CERTAINTY_HALO_RADII = exports.POINTS_FADE_DURATION = exports.MIN_DURATION = exports.EMOTION_HEX_FADE_DURATION = exports.CORNER_SHADOW_HIDE_RADIUS = exports.SHADOW_HIDE_FEATHER = exports.SIDE_SHADOW_HIDE_WIDTH = exports.MAX_HEX_DIFF = exports.MAX_HEX_RADIUS = exports.MIN_HEX_RADIUS = exports.JSON_PATHS = exports.CHROME_TALL_HEIGHT = exports.CHROME_SHORT_HEIGHT = exports.CHROME_SPACE_BETWEEN_LINES = exports.CHROME_SINGLE_LINE_HEIGHT = exports.BACKEND_CHROME_ITEM_WIDTH = exports.CHROME_ITEM_WIDTH = exports.CHROME_VERTICAL_PADDING = exports.CHROME_HORIZONTAL_PADDING = exports.CHROME_HEX_RADIUS = exports.CHROME_MAX_ITEMS = exports.CHROME_MAX_ROWS = exports.HALO_BLEND = exports.HALO_ALPHA = exports.HALO_INNER_COLOR_RANDOM = exports.HALO_OUTER_COLOR = exports.VIGNETTE_BLEND = exports.VIGNETTE_ALPHA = exports.VIGNETTE_RADIUS = exports.VIGNETTE_OUTER_COLOR_RANDOM = exports.VIGNETTE_CENTER_COLOR = exports.BG_ALPHA = exports.BLEND_NORMAL = exports.HEXAGON_CORNER_RADIUS = exports.HEX_MIN_BOTTOM_EYES_MARGIN = exports.HEX_MIN_BOTTOM_VERTICAL_MARGIN = exports.HEX_UPPER_MIN_VERTICAL_MARGIN = exports.HEX_LOWER_MIN_VERTICAL_MARGIN = undefined;
+	exports.getStrongestColor = getStrongestColor;
 	exports.generateSinglePersonTreatment = generateSinglePersonTreatment;
 	exports.generatePersonalAuraColors = generatePersonalAuraColors;
 	exports.generateGroupAuraColors = generateGroupAuraColors;
@@ -1692,6 +1694,46 @@
 	  VERY_LIKELY: 1.5
 	};
 	
+	function getStrongestColor(imageElement) {
+	  var emo = imageElement.facesAndStrongestEmotions;
+	  var emotionStrengths = [];
+	  var returnColors = [];
+	
+	  function compareStrength(a, b) {
+	    if (a.strength < b.strength) return 1;
+	    if (a.strength > b.strength) return -1;
+	    return 0;
+	  }
+	
+	  emo.forEach(function (emotions, index) {
+	    var strength = _emotionUtils.EMOTION_STRENGTHS[emo[index][Object.keys(emo[index])[0]]];
+	    if (!strength) strength = 0;
+	    var emoObj = { index: index, strength: strength };
+	    emotionStrengths.push(emoObj);
+	  });
+	
+	  // Sort people by strength of emotion
+	  emotionStrengths.sort(compareStrength);
+	
+	  emotionStrengths.forEach(function (item, index) {
+	    var personIndex = emotionStrengths[index].index;
+	    var color = imageElement.treatments.personalAuraColors[personIndex][0];
+	    if (color !== colorUtils.NEUTRAL) {
+	      returnColors.push(imageElement.treatments.personalAuraColors[personIndex][0]);
+	    }
+	  });
+	
+	  return returnColors;
+	
+	  // This was so if a person had 2 emotions, and the other had none, it would use the first persons strongest emotion
+	  // returnColor = imageElement.treatments.personalAuraColors[strongestEmotion][0];
+	  // if(returnColor === 'rgba(34, 45, 51, 1)') {
+	  //   const changeTo = (strongestEmotion === 1) ? 0 : 1;
+	  //   returnColor = imageElement.treatments.personalAuraColors[changeTo][0];
+	  // }
+	  // return returnColor;
+	}
+	
 	function generateSinglePersonTreatment(person) {
 	  var emotions = Object.keys(person);
 	  if (emotions.length === 0) {
@@ -1737,9 +1779,9 @@
 	      vignetteOuterColor = colorUtils.generateColorFromIndex(vignetteOuterIndex, emotions);
 	    }
 	
-	    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
-	      backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
-	    }
+	    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
+	    //   backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
+	    // }
 	
 	    haloInnerColor = colorUtils.generateColorFromIndex(haloInnerIndex, emotions);
 	    haloOuterColor = haloInnerColor;
@@ -1749,14 +1791,14 @@
 	
 	    haloInnerColor = colorUtils.subAlpha(haloInnerColor, 0.75);
 	
-	    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
-	      haloInnerColor = colorUtils.TRANSPARENT;
-	    }
-	    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
-	      haloOuterColor = colorUtils.TRANSPARENT;
-	    } else {
-	      haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
-	    }
+	    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
+	    //   haloInnerColor = colorUtils.TRANSPARENT;
+	    // }
+	    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
+	    //   haloOuterColor = colorUtils.TRANSPARENT;
+	    // } else {
+	    haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
+	    // }
 	  }
 	
 	  haloRadius = CERTAINTY_HALO_RADII[person[emotions[haloInnerIndex]]];
@@ -1890,6 +1932,7 @@
 	exports.subAlpha = subAlpha;
 	exports.splitRGBA = splitRGBA;
 	exports.chooseRandomColorFromEmotion = chooseRandomColorFromEmotion;
+	exports.shadeRGBColor = shadeRGBColor;
 	exports.getRandomColorWithAlpha = getRandomColorWithAlpha;
 	exports.generateColorFromIndex = generateColorFromIndex;
 	exports.getEmotionForColor = getEmotionForColor;
@@ -1915,10 +1958,14 @@
 	var BLACK = exports.BLACK = 'rgba(0, 0, 0, 1)';
 	
 	var CERTAINTY_ALPHAS = exports.CERTAINTY_ALPHAS = {
-	  VERY_UNLIKELY: 0,
-	  UNLIKELY: 50,
-	  POSSIBLE: 70,
-	  LIKELY: 90,
+	  // VERY_UNLIKELY: 0,
+	  // UNLIKELY: 50,
+	  // POSSIBLE: 70,
+	  // LIKELY: 90,
+	  VERY_UNLIKELY: 100,
+	  UNLIKELY: 100,
+	  POSSIBLE: 100,
+	  LIKELY: 100,
 	  VERY_LIKELY: 100
 	};
 	
@@ -1970,6 +2017,21 @@
 	  }
 	
 	  return color;
+	}
+	
+	function shadeRGBColor(color, percent) {
+	  var f = color.split(",");
+	  var sliceCount = f[0].includes('rgba') === true ? 5 : 4;
+	  var t = percent < 0 ? 0 : 255;
+	  var p = percent < 0 ? percent * -1 : percent;
+	  var R = parseInt(f[0].slice(sliceCount));
+	  var G = parseInt(f[1]);
+	  var B = parseInt(f[2]);
+	  var returnVal = 'rgba(' + (Math.round((t - R) * p) + R) + ',' + (Math.round((t - G) * p) + G) + ', ' + (Math.round((t - B) * p) + B) + ', 1)';
+	  if (sliceCount === 4) {
+	    returnVal = 'rgb(' + (Math.round((t - R) * p) + R) + ',' + (Math.round((t - G) * p) + G) + ', ' + (Math.round((t - B) * p) + B) + ')';
+	  }
+	  return returnVal;
 	}
 	
 	function getRandomColorWithAlpha() {
@@ -4148,11 +4210,12 @@
 	
 	var Tween = __webpack_require__(12);
 	
-	var BASE_RADIUS = 115;
+	var BASE_RADIUS = 135;
 	var BASE_GROUP_RADIUS = 225;
+	var MAX_GROUP_RADIUS = 390;
 	var CIRCLE_OFFSET = 30;
 	var CIRCLE_GROUP_OFFSET = 75;
-	var NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
+	var LINE_WIDTH = 2;
 	
 	var CanvasUtils = function () {
 	  function CanvasUtils(imageElement) {
@@ -4175,6 +4238,8 @@
 	
 	      return dpr / bsr;
 	    }();
+	
+	    this.isGroup = this.imageElement.facesAndEmotions.length !== 1;
 	  }
 	
 	  _createClass(CanvasUtils, [{
@@ -4518,6 +4583,34 @@
 	      this.imageElement.context.restore();
 	    }
 	  }, {
+	    key: 'cutOutCircle',
+	    value: function cutOutCircle() {
+	      var closePath = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	
+	      var baseRadius = this.getBaseRadius();
+	
+	      var circleOffset = CIRCLE_OFFSET;
+	      if (this.isGroup) {
+	        circleOffset = CIRCLE_GROUP_OFFSET;
+	      }
+	
+	      this.imageElement.context.save();
+	
+	      this.imageElement.context.beginPath();
+	      this.imageElement.context.moveTo(0, 0);
+	      this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
+	      this.imageElement.context.lineTo(this.imageElement.canvasWidth, this.imageElement.canvasHeight);
+	      this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
+	      this.imageElement.context.lineTo(0, 0);
+	
+	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+	
+	      if (closePath) {
+	        this.imageElement.context.closePath();
+	      }
+	      this.imageElement.context.restore();
+	    }
+	  }, {
 	    key: 'fillBackground',
 	    value: function fillBackground() {
 	      this.imageElement.context.fillStyle = this.imageElement.backgroundFill;
@@ -4587,21 +4680,38 @@
 	      return gradient;
 	    }
 	  }, {
+	    key: 'getBaseRadius',
+	    value: function getBaseRadius() {
+	      var baseRadius = BASE_RADIUS * this.shapeScale;
+	      if (this.isGroup) {
+	        baseRadius = BASE_GROUP_RADIUS;
+	        if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
+	          baseRadius = this.imageElement.hexR;
+	        }
+	        if (baseRadius > MAX_GROUP_RADIUS) {
+	          baseRadius = MAX_GROUP_RADIUS;
+	        }
+	        baseRadius = baseRadius * this.shapeScale;
+	      }
+	
+	      return baseRadius;
+	    }
+	  }, {
 	    key: 'createShapeBackground',
-	    value: function createShapeBackground(opacity) {
+	    value: function createShapeBackground(opacityProgress) {
+	      // const opacity = opacityProgress * 0.75;
+	      var opacity = opacityProgress;
 	      this.imageElement.context.save();
 	      this.imageElement.context.moveTo(0, 0);
 	      this.imageElement.context.translate(0, 0);
 	
-	      var group = this.imageElement.facesAndEmotions.length !== 1;
-	
+	      var group = this.isGroup;
 	      var color = null;
 	
 	      var EMO_COLOR = colorUtils.NEUTRAL;
 	      if (!this.imageElement.noEmotions) {
 	        if (group) {
-	          var gradientColors = this.imageElement.treatments.groupAuraColors;
-	          EMO_COLOR = gradientColors[0];
+	          EMO_COLOR = (0, _animationUtils.getStrongestColor)(this.imageElement)[0];
 	        } else {
 	          EMO_COLOR = this.imageElement.treatments.treatment.background;
 	        }
@@ -4609,21 +4719,17 @@
 	
 	      color = this.imageElement.noEmotions ? colorUtils.subAlpha(colorUtils.NEUTRAL_WHITE, opacity * 0.5) : colorUtils.subAlpha(EMO_COLOR, opacity);
 	
-	      var baseRadius = BASE_RADIUS * this.shapeScale;
-	      if (group) {
-	        baseRadius = BASE_GROUP_RADIUS;
-	        if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-	          baseRadius = this.imageElement.hexR;
-	        }
-	      }
+	      var baseRadius = this.getBaseRadius();
 	
 	      var circleOffset = CIRCLE_OFFSET;
 	      if (group) {
 	        circleOffset = CIRCLE_GROUP_OFFSET;
 	      }
 	
+	      var fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false); // 0.45, 0.5 // 0.3, 0.4
+	
 	      this.imageElement.context.globalCompositeOperation = 'screen';
-	      this.imageElement.context.fillStyle = color;
+	      this.imageElement.context.fillStyle = fillColor;
 	      this.imageElement.context.beginPath();
 	      this.imageElement.context.moveTo(0, 0);
 	      this.imageElement.context.lineTo(0, this.imageElement.canvasHeight);
@@ -4638,24 +4744,35 @@
 	      this.imageElement.context.restore();
 	    }
 	  }, {
-	    key: 'drawCircle',
-	    value: function drawCircle() {
-	      var group = this.imageElement.facesAndEmotions.length !== 1;
-	
-	      var baseRadius = BASE_RADIUS * this.shapeScale;
-	      if (group) {
-	        baseRadius = BASE_GROUP_RADIUS;
-	        if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-	          baseRadius = this.imageElement.hexR;
+	    key: 'getEmoColor',
+	    value: function getEmoColor() {
+	      var darken = -0.1;
+	      var alpha = 0.8;
+	      var emoColor = void 0;
+	      if (this.imageElement.noEmotions) {
+	        emoColor = colorUtils.NEUTRAL;
+	      } else {
+	        if (this.isGroup) {
+	          emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor((0, _animationUtils.getStrongestColor)(this.imageElement)[0], darken), alpha);
+	        } else {
+	          emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(this.imageElement.treatments.treatment.halo.outerColor, darken), alpha);
 	        }
 	      }
+	      return emoColor;
+	    }
+	  }, {
+	    key: 'drawCircle',
+	    value: function drawCircle() {
+	      var group = this.isGroup;
+	
+	      var baseRadius = this.getBaseRadius();
+	
+	      var emoColor = this.getEmoColor();
 	
 	      var circleOffset = CIRCLE_OFFSET;
 	      if (group) {
 	        circleOffset = CIRCLE_GROUP_OFFSET;
 	      }
-	
-	      var emoColor = NEUTRAL_LINE_COLOR;
 	
 	      this.imageElement.context.save();
 	
@@ -4665,8 +4782,9 @@
 	        requestAnimationFrame(this.drawCircle.bind(this));
 	
 	        this.imageElement.context.save();
+	        this.imageElement.context.globalCompositeOperation = 'source-over';
 	        this.imageElement.context.strokeStyle = emoColor;
-	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	        this.imageElement.context.translate(0, 0);
 	        this.imageElement.context.beginPath();
 	
@@ -4684,33 +4802,27 @@
 	  }, {
 	    key: 'createTopShapes',
 	    value: function createTopShapes(single, progress) {
-	      var group = this.imageElement.facesAndEmotions.length !== 1;
-	      var emoColor = NEUTRAL_LINE_COLOR;
+	      var group = this.isGroup;
+	      var blendMode = 'source-over';
 	
 	      this.imageElement.context.save();
-	
 	      this.imageElement.context.translate(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y);
 	
-	      this.imageElement.context.globalCompositeOperation = 'source-over';
-	
-	      this.imageElement.context.restore();
-	      this.imageElement.context.save();
-	      this.imageElement.context.translate(0, 0);
-	      this.imageElement.context.strokeStyle = emoColor;
-	      this.imageElement.context.lineWidth = this.shapeScale;
-	
-	      var baseRadius = BASE_RADIUS * this.shapeScale;
-	      if (group) {
-	        baseRadius = BASE_GROUP_RADIUS;
-	        if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
-	          baseRadius = this.imageElement.hexR;
-	        }
-	      }
+	      var emoColor = this.getEmoColor();
 	
 	      var circleOffset = CIRCLE_OFFSET;
 	      if (group) {
 	        circleOffset = CIRCLE_GROUP_OFFSET;
 	      }
+	
+	      this.imageElement.context.restore();
+	      this.imageElement.context.save();
+	      this.imageElement.context.translate(0, 0);
+	      this.imageElement.context.strokeStyle = emoColor;
+	      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+	      this.imageElement.context.globalCompositeOperation = blendMode;
+	
+	      var baseRadius = this.getBaseRadius();
 	
 	      this.imageElement.context.beginPath();
 	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
@@ -4746,12 +4858,13 @@
 	        this.imageElement.context.save();
 	        this.imageElement.context.translate(0, 0);
 	        this.imageElement.context.strokeStyle = emoColor;
-	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+	        this.imageElement.context.globalCompositeOperation = blendMode;
 	
 	        var randomOffset = this.imageElement.randomizedArcs[0];
 	
 	        this.imageElement.context.beginPath();
-	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 10, randomOffset, randomOffset + this.circleAnim * Math.PI);
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 15, randomOffset, randomOffset + this.circleAnim * Math.PI);
 	        this.imageElement.context.stroke();
 	
 	        // 3
@@ -4762,10 +4875,11 @@
 	        this.imageElement.context.save();
 	        this.imageElement.context.translate(0, 0);
 	        this.imageElement.context.strokeStyle = emoColor;
-	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+	        this.imageElement.context.globalCompositeOperation = blendMode;
 	
 	        this.imageElement.context.beginPath();
-	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 30, randomOffset, randomOffset + this.circleAnim * (Math.PI * 0.5));
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 35, randomOffset, randomOffset + this.circleAnim * (Math.PI * 0.5));
 	        this.imageElement.context.stroke();
 	
 	        // 4
@@ -4776,10 +4890,11 @@
 	        this.imageElement.context.save();
 	        this.imageElement.context.translate(0, 0);
 	        this.imageElement.context.strokeStyle = emoColor;
-	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+	        this.imageElement.context.globalCompositeOperation = blendMode;
 	
 	        this.imageElement.context.beginPath();
-	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + -(0.1 * Math.PI), randomOffset + this.circleAnim * (Math.PI * 0.7));
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 55, randomOffset + -(0.1 * Math.PI), randomOffset + this.circleAnim * (Math.PI * 0.7));
 	        this.imageElement.context.stroke();
 	
 	        // 5
@@ -4788,10 +4903,11 @@
 	        this.imageElement.context.save();
 	        this.imageElement.context.translate(0, 0);
 	        this.imageElement.context.strokeStyle = emoColor;
-	        this.imageElement.context.lineWidth = this.shapeScale;
+	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
+	        this.imageElement.context.globalCompositeOperation = blendMode;
 	
 	        this.imageElement.context.beginPath();
-	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 50, randomOffset + 0.8 * Math.PI, randomOffset + (0.8 * Math.PI + this.circleAnim * Math.PI));
+	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius + 55, randomOffset + 0.8 * Math.PI, randomOffset + (0.8 * Math.PI + this.circleAnim * Math.PI));
 	        this.imageElement.context.stroke();
 	      }
 	
@@ -6697,6 +6813,14 @@
 	
 	var _chromeStep2 = _interopRequireDefault(_chromeStep);
 	
+	var _groupCircleStep = __webpack_require__(35);
+	
+	var _groupCircleStep2 = _interopRequireDefault(_groupCircleStep);
+	
+	var _multiAuraStep = __webpack_require__(36);
+	
+	var _multiAuraStep2 = _interopRequireDefault(_multiAuraStep);
+	
 	var _particles = __webpack_require__(34);
 	
 	var _particles2 = _interopRequireDefault(_particles);
@@ -7033,7 +7157,11 @@
 	    value: function animateInBackground() {
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 	
-	      this.backgroundStep = new _backgroundStep2.default(this, this.canvas, this.context, duration);
+	      if (this.facesAndEmotions.length !== 1) {
+	        this.groupCircleStep = new _groupCircleStep2.default(this, this.canvas, this.context, duration);
+	      } else {
+	        this.backgroundStep = new _backgroundStep2.default(this, this.canvas, this.context, duration);
+	      }
 	    }
 	  }, {
 	    key: 'animateInHalo',
@@ -7048,7 +7176,7 @@
 	    value: function animateInHaloMulti() {
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 	
-	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
+	      this.multiAuraStep = new _multiAuraStep2.default(this, this.canvas, this.context, duration);
 	      this.showParticles();
 	    }
 	  }, {
@@ -7145,7 +7273,7 @@
 	
 	      this.canvasUtils.redrawBaseImage();
 	
-	      this.canvasUtils.createShapeBackground(progress * 0.75);
+	      this.canvasUtils.createShapeBackground(progress);
 	
 	      if (!this.circleStarted && progress !== 1) {
 	        this.circleStarted = true;
@@ -7238,7 +7366,7 @@
 	
 	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
 	
-	var _emotionUtils = __webpack_require__(7);
+	var _animationUtils = __webpack_require__(9);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7269,41 +7397,16 @@
 	      this.canvasUtils = null;
 	    }
 	  }, {
-	    key: 'getStrongestColor',
-	    value: function getStrongestColor() {
-	      var emo = this.imageElement.facesAndStrongestEmotions;
-	      var strongestEmotion = 0;
-	
-	      var strength1 = _emotionUtils.EMOTION_STRENGTHS[emo[0][Object.keys(emo[0])[0]]];
-	      var strength2 = _emotionUtils.EMOTION_STRENGTHS[emo[1][Object.keys(emo[1])[0]]];
-	
-	      if (strength2 > strength1) {
-	        strongestEmotion = 1;
-	      }
-	
-	      var returnColor = void 0;
-	
-	      returnColor = this.imageElement.treatments.personalAuraColors[strongestEmotion][0];
-	
-	      if (returnColor === 'rgba(34, 45, 51, 1)') {
-	        var changeTo = strongestEmotion === 1 ? 0 : 1;
-	        returnColor = this.imageElement.treatments.personalAuraColors[changeTo][0];
-	      }
-	
-	      return returnColor;
-	    }
-	  }, {
 	    key: 'animateInHaloFrame',
 	    value: function animateInHaloFrame() {
 	      var prg = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
 	
 	      var progress = prg / 2;
-	      var gradientColors = this.imageElement.treatments.personalAuraColors;
 	      var group = this.imageElement.facesAndEmotions.length !== 1;
 	
 	      this.canvasUtils.redrawBaseImage();
 	      this.context.save();
-	      this.canvasUtils.createShapeBackground(0.75);
+	      this.canvasUtils.createShapeBackground(1);
 	
 	      if (!this.imageElement.noEmotions) {
 	
@@ -7318,11 +7421,12 @@
 	          var alpha = ease.expOut(0, 0.5, progress);
 	          var r = ease.expOut(this.canvas.height * 0.1, this.canvas.height * 1.6, progress);
 	
-	          var gradient = this.context.createRadialGradient(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, this.imageElement.hexR, this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, r);
+	          var gradient = this.context.createRadialGradient(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, this.imageElement.hexR - 125, this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y, r);
 	
 	          if (group) {
-	            gradient.addColorStop(0, this.getStrongestColor());
+	            gradient.addColorStop(0, (0, _animationUtils.getStrongestColor)(this.imageElement)[1]);
 	          } else {
+	            // gradient.addColorStop(0, colorUtils.TRANSPARENT);
 	            gradient.addColorStop(0, this.imageElement.treatments.treatment.halo.innerColor);
 	
 	            if (this.imageElement.treatments.treatment.halo.outerColor !== colorUtils.TRANSPARENT) {
@@ -7343,9 +7447,9 @@
 	          var _r = ease.expOut(0.1, 1.2, progress);
 	
 	          if (group) {
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(gradientColors[0][0], colorUtils.TRANSPARENT, _r, false);
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient((0, _animationUtils.getStrongestColor)(this.imageElement)[0], colorUtils.TRANSPARENT, _r, false);
 	          } else {
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.outerColor, colorUtils.TRANSPARENT, _r, false);
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, _r, false);
 	          }
 	
 	          this.context.globalCompositeOperation = 'source-over';
@@ -7357,14 +7461,10 @@
 	          var r2 = void 0;
 	          if (group) {
 	            r2 = ease.expOut(0, this.imageElement.hexR * 3 / this.canvas.height, progress);
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(gradientColors[1][0], 1), colorUtils.TRANSPARENT, r2, false, 0.4, 1);
-	          } else {
-	            r2 = ease.expOut(0, this.imageElement.hexR * (Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.radius : 3) / this.canvas.height, progress);
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(this.imageElement.treatments.treatment.halo.innerColor, Object.keys(this.imageElement.facesAndEmotions[0]).length === 1 ? this.imageElement.treatments.treatment.halo.alpha : 1), colorUtils.TRANSPARENT, r2, false, 0.3, 1);
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha((0, _animationUtils.getStrongestColor)(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false); // 0.4, 1
+	            this.context.globalAlpha = alpha2;
+	            this.context.fill();
 	          }
-	
-	          this.context.globalAlpha = alpha2;
-	          this.context.fill();
 	
 	          this.context.restore();
 	        }
@@ -7717,12 +7817,13 @@
 	
 	var colorUtils = _interopRequireWildcard(_colorUtils);
 	
+	var _animationUtils = __webpack_require__(9);
+	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var PARTICLE_COUNT = 7;
-	var NEUTRAL_LINE_COLOR = 'rgba(0,0,0,.3)';
 	
 	var Particles = function () {
 	  function Particles(imageElement, canvas, context) {
@@ -7760,6 +7861,9 @@
 	    value: function calculateWithScale(num) {
 	      var group = this.imageElement.facesAndEmotions.length !== 1;
 	      var radiusScale = this.imageElement.hexR / (225 * this.shapeScale);
+	      if (radiusScale > 390 * this.shapeScale) {
+	        radiusScale = 390 * this.shapeScale;
+	      }
 	      var total = num * this.shapeScale;
 	      if (group && this.imageElement.hexR > 225) {
 	        total = num * radiusScale * this.shapeScale;
@@ -7804,8 +7908,21 @@
 	
 	      this.context.save();
 	
-	      var emoColor = NEUTRAL_LINE_COLOR;
-	      var color = colorUtils.subAlpha(emoColor, this.particleFade * .3);
+	      var emoColor = void 0;
+	      var darken = -0.1;
+	      var alpha = 0.8;
+	
+	      if (this.imageElement.noEmotions) {
+	        emoColor = colorUtils.NEUTRAL;
+	      } else {
+	        if (this.imageElement.facesAndEmotions.length !== 1) {
+	          emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor((0, _animationUtils.getStrongestColor)(this.imageElement)[0], darken), alpha);
+	        } else {
+	          emoColor = colorUtils.subAlpha(colorUtils.shadeRGBColor(this.imageElement.treatments.treatment.halo.outerColor, darken), alpha);
+	        }
+	      }
+	
+	      var color = colorUtils.subAlpha(emoColor, this.particleFade);
 	
 	      this.context.fillStyle = color;
 	
@@ -7834,6 +7951,420 @@
 
 /***/ },
 /* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global require */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	var _imageConst = __webpack_require__(11);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var CircleStep = function () {
+	  function CircleStep(imageElement, canvas, context, duration) {
+	    _classCallCheck(this, CircleStep);
+	
+	    this.imageElement = imageElement;
+	    this.canvas = canvas;
+	    this.context = context;
+	
+	    this.circleStarted = false;
+	
+	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
+	
+	    this.animateInCircle(duration);
+	  }
+	
+	  _createClass(CircleStep, [{
+	    key: 'kill',
+	    value: function kill() {
+	      this.imageElement = null;
+	      this.canvas = null;
+	      this.context = null;
+	      this.canvasUtils = null;
+	    }
+	  }, {
+	    key: 'animateInCircleFrame',
+	    value: function animateInCircleFrame() {
+	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      if (!this.circleStarted && progress !== 1) {
+	        this.circleStarted = true;
+	        this.canvasUtils.drawCircle();
+	      } else {
+	        if (this.imageElement.currentFrame >= _imageConst.TOTAL_CIRCLE_FRAMES) {
+	          this.canvasUtils.createTopShapes(true, 0);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'animateInCircle',
+	    value: function animateInCircle() {
+	      var _this = this;
+	
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      if (duration === 0) {
+	        this.imageElement.ifNotDrawing(function () {
+	          _this.animateInCircleFrame(1);
+	        });
+	      } else {
+	        (function () {
+	          var active = null;
+	          var backgroundTimeline = new Timeline({
+	            onStart: function onStart() {
+	              _this.imageElement.timelines.push(backgroundTimeline);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTimeline(backgroundTimeline);
+	              _this.context.restore();
+	            }
+	          });
+	
+	          var progress = 0;
+	
+	          backgroundTimeline.to(_this.canvas, duration, {
+	            onStart: function onStart() {
+	              active = backgroundTimeline.getActive()[0];
+	              _this.imageElement.tweens.push(active);
+	            },
+	            onUpdate: function onUpdate() {
+	              progress = active.progress();
+	              _this.animateInCircleFrame(progress);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTween(active);
+	            }
+	          });
+	        })();
+	      }
+	    }
+	  }]);
+	
+	  return CircleStep;
+	}();
+	
+	exports.default = CircleStep;
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global require, single */
+	
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _easings = __webpack_require__(19);
+	
+	var ease = _interopRequireWildcard(_easings);
+	
+	var _animationUtils = __webpack_require__(9);
+	
+	var animationUtils = _interopRequireWildcard(_animationUtils);
+	
+	var _colorUtils = __webpack_require__(10);
+	
+	var colorUtils = _interopRequireWildcard(_colorUtils);
+	
+	var _pointUtils = __webpack_require__(18);
+	
+	var _pointUtils2 = _interopRequireDefault(_pointUtils);
+	
+	var _canvasUtils = __webpack_require__(17);
+	
+	var _canvasUtils2 = _interopRequireDefault(_canvasUtils);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Timeline = __webpack_require__(14);
+	
+	var MultiAuraStep = function () {
+	  function MultiAuraStep(imageElement, canvas, context, duration) {
+	    _classCallCheck(this, MultiAuraStep);
+	
+	    this.imageElement = imageElement;
+	    this.canvas = canvas;
+	    this.context = context;
+	    this.pointUtils = new _pointUtils2.default(imageElement);
+	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
+	
+	    this.animateInMultiAura(duration);
+	  }
+	
+	  _createClass(MultiAuraStep, [{
+	    key: 'fillInFeatheredCircle',
+	    value: function fillInFeatheredCircle(pattern, radius, feather) {
+	      var reverse = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	      var centered = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
+	
+	      var tempCanvas = this.canvasUtils.createHiDPICanvas();
+	      tempCanvas.width = this.canvas.width;
+	      tempCanvas.height = this.canvas.height;
+	      var tempContext = tempCanvas.getContext('2d');
+	      animationUtils.setSmoothing(tempContext);
+	
+	      var x = centered ? this.canvas.width / 2 : this.imageElement.eyesMidpoint.x;
+	      var y = centered ? this.canvas.height / 2 : this.imageElement.eyesMidpoint.y;
+	
+	      var gradient = tempContext.createRadialGradient(x, y, 0, x, y, radius);
+	
+	      gradient.addColorStop(1 - feather / radius, reverse ? colorUtils.TRANSPARENT : colorUtils.BLACK);
+	      gradient.addColorStop(1, reverse ? colorUtils.BLACK : colorUtils.TRANSPARENT);
+	
+	      tempContext.fillStyle = gradient;
+	      tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+	
+	      tempContext.fillStyle = pattern;
+	      tempContext.globalCompositeOperation = 'source-in';
+	      tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+	
+	      var canvasPattern = tempContext.createPattern(tempCanvas, 'no-repeat');
+	
+	      return canvasPattern;
+	    }
+	  }, {
+	    key: 'animateInMultiAuraFrame',
+	    value: function animateInMultiAuraFrame() {
+	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var startR = arguments.length <= 1 || arguments[1] === undefined ? this.canvas.width : arguments[1];
+	      var fill = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	      var comp = arguments.length <= 3 || arguments[3] === undefined ? animationUtils.BLEND_NORMAL : arguments[3];
+	
+	      if (!fill) {
+	        return;
+	      }
+	
+	      this.context.globalAlpha = ease.expOut(0, 1, progress);
+	
+	      this.imageElement.isDrawing = true;
+	
+	      var feather = ease.linear(0, startR, progress);
+	
+	      this.canvasUtils.redrawBaseImage();
+	
+	      this.context.fillStyle = this.fillInFeatheredCircle(fill, startR, feather);
+	      // this.context.globalAlpha = ease.expOut(0.4, 1, progress);
+	      this.context.globalCompositeOperation = comp;
+	
+	      this.canvasUtils.cutOutCircle();
+	
+	      this.context.fill();
+	
+	      this.context.fillStyle = this.fillInFeatheredCircle(fill, ease.expOut(this.imageElement.hexR * 0.75, this.imageElement.hexR * 1.25, progress), ease.exp(this.imageElement.hexR * 0.25, this.imageElement.hexR * 0.75, progress));
+	
+	      // this.context.globalAlpha = ease.exp(0.3, 0.7, progress);
+	      this.context.globalAlpha = ease.expOut(0, 0.7, progress);
+	
+	      this.context.globalCompositeOperation = 'screen';
+	      this.context.fill();
+	
+	      this.context.globalCompositeOperation = 'color-burn';
+	      this.context.fill();
+	
+	      this.context.fillStyle = this.fillInFeatheredCircle(fill, ease.expOut(this.canvas.height * 2, this.canvas.height, progress), ease.exp(this.canvas.height, this.canvas.height - this.imageElement.hexR / 2, progress), true, false);
+	
+	      // this.context.globalAlpha = ease.exp(0, 0.6, progress);
+	      this.context.globalAlpha = ease.expOut(0, 0.6, progress);
+	
+	      this.context.globalCompositeOperation = 'multiply';
+	      this.context.fill();
+	
+	      this.context.fillStyle = this.fillInFeatheredCircle(colorUtils.BLACK, this.canvas.height, this.canvas.height / 6, true, true);
+	      // this.context.globalAlpha = ease.exp(0, 0.05, progress);
+	      this.context.globalAlpha = ease.expOut(0, 0.05, progress);
+	      this.context.globalCompositeOperation = 'source-over';
+	      this.context.fill();
+	
+	      this.context.fillStyle = this.fillInFeatheredCircle(fill, this.canvas.height * 1.2, this.canvas.height / 5, true, true);
+	      // this.context.globalAlpha = ease.exp(0, 1, progress);
+	      this.context.globalAlpha = ease.expOut(0, 1, progress);
+	      this.context.globalCompositeOperation = 'hard-light';
+	      this.context.fill();
+	
+	      this.context.globalCompositeOperation = 'source-over';
+	      this.context.globalAlpha = 1;
+	      this.canvasUtils.createTopShapes(false, progress);
+	
+	      this.imageElement.isDrawing = false;
+	    }
+	  }, {
+	    key: 'animateInMultiAura',
+	    value: function animateInMultiAura() {
+	      var _this = this;
+	
+	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	
+	      var fill = null;
+	      var comp = this.imageElement.treatments.groupAuraColors.length > 0 ? 'screen' : 'lighten';
+	      var startR = this.pointUtils.toGridCoords(this.imageElement.faceBounds.right - this.imageElement.faceBounds.left) / 2;
+	
+	      if (duration === 0) {
+	        this.imageElement.ifNotDrawing(function () {
+	          _this.animateInMultiAuraFrame(1, _this.canvas.width, _this.getMultiAuraFill(), comp);
+	        });
+	      } else {
+	        (function () {
+	          var active = null;
+	
+	          var auraTimeline = new Timeline({
+	            onStart: function onStart() {
+	              _this.imageElement.timelines.push(auraTimeline);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTimeline(auraTimeline);
+	            }
+	          });
+	          auraTimeline.to(_this.canvas, duration, {
+	            onStart: function onStart() {
+	              active = auraTimeline.getActive()[0];
+	              fill = _this.getMultiAuraFill();
+	              _this.imageElement.fills = [fill];
+	              _this.imageElement.isDrawing = false;
+	              _this.imageElement.tweens.push(active);
+	            },
+	            onUpdate: function onUpdate() {
+	              var progress = active.progress();
+	              var r = ease.exp(startR, _this.canvas.width, progress);
+	
+	              _this.animateInMultiAuraFrame(progress, r, _this.imageElement.fills[0], comp);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	              _this.imageElement.killTween(active);
+	            }
+	          });
+	        })();
+	      }
+	    }
+	  }, {
+	    key: 'getMultiAuraFill',
+	    value: function getMultiAuraFill() {
+	      var tempCanvas = this.canvasUtils.createHiDPICanvas(this.imageElement.canvasWidth, this.imageElement.canvasHeight);
+	      tempCanvas.width = this.imageElement.canvasWidth;
+	      tempCanvas.height = this.imageElement.canvasHeight;
+	      var tempContext = tempCanvas.getContext('2d');
+	      animationUtils.setSmoothing(tempContext);
+	
+	      var gradientColors = this.imageElement.treatments.groupAuraColors;
+	
+	      // no one in the group shows any emotion
+	      if (gradientColors.length === 0) {
+	        tempContext.save();
+	        tempContext.fillStyle = colorUtils.subAlpha(colorUtils.NEUTRAL, 0.35);
+	        tempContext.globalAlpha = 1;
+	        tempContext.globalCompositeOperation = 'source-over';
+	
+	        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+	
+	        var solidPattern = tempContext.createPattern(tempCanvas, 'no-repeat');
+	
+	        tempContext.restore();
+	
+	        return solidPattern;
+	      } else if (gradientColors.length === 1) {
+	        // only one emotion in the entire group
+	        var gradient = this.canvasUtils.createSimpleGradient(gradientColors[0], colorUtils.subAlpha(gradientColors[0], 0.2));
+	
+	        tempContext.save();
+	        tempContext.fillStyle = gradient;
+	        tempContext.globalAlpha = 1;
+	        tempContext.globalCompositeOperation = 'source-over';
+	
+	        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+	
+	        var _gradientPattern = tempContext.createPattern(tempCanvas, 'no-repeat');
+	
+	        tempContext.restore();
+	
+	        return _gradientPattern;
+	      }
+	
+	      tempContext.save();
+	      // get total number of emotions to display, and then tween between their colors, degree by degree
+	      var degBetweenColors = 360 / gradientColors.length;
+	      var currOffset = 0;
+	      var offsetDeg = 30 - Math.floor(Math.random() * 36) + 135;
+	      var startOffset = 360 + offsetDeg;
+	      tempContext.globalCompositeOperation = animationUtils.BLEND_NORMAL;
+	
+	      tempContext.fillStyle = colorUtils.WHITE;
+	      tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+	
+	      tempContext.translate(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y);
+	      tempContext.lineWidth = 1;
+	      tempContext.lineCap = 'round';
+	
+	      gradientColors.forEach(function (color, index, arr) {
+	        var nextColor = arr[(index + 1) % arr.length];
+	        var colorSplit = colorUtils.splitRGBA(color);
+	        var nextColorSplit = colorUtils.splitRGBA(nextColor);
+	        var rStep = (nextColorSplit.r - colorSplit.r) / degBetweenColors;
+	        var gStep = (nextColorSplit.g - colorSplit.g) / degBetweenColors;
+	        var bStep = (nextColorSplit.b - colorSplit.b) / degBetweenColors;
+	        currOffset = degBetweenColors * index + startOffset;
+	
+	        for (var currDeg = 0; currDeg < degBetweenColors; currDeg += single ? 0.01 : 0.02) {
+	          var actualCurrDeg = currDeg + currOffset + startOffset;
+	          tempContext.save();
+	          tempContext.rotate(Math.PI * actualCurrDeg * -1 / 180);
+	          tempContext.translate(tempContext.lineWidth / 2 * -1, tempContext.lineWidth / 2);
+	
+	          var currR = parseInt(colorSplit.r + currDeg * rStep, 10);
+	          var currG = parseInt(colorSplit.g + currDeg * gStep, 10);
+	          var currB = parseInt(colorSplit.b + currDeg * bStep, 10);
+	          var currA = 1;
+	          var currStyle = 'rgba(' + currR + ', ' + currG + ', ' + currB + ', ' + currA + ')';
+	
+	          tempContext.globalAlpha = currA;
+	
+	          tempContext.fillStyle = currStyle;
+	
+	          tempContext.fillRect(0, 0, 0.8, Math.max(tempCanvas.width, tempCanvas.height) * 2);
+	
+	          tempContext.restore();
+	        }
+	      });
+	
+	      var gradientPattern = tempContext.createPattern(tempCanvas, 'no-repeat');
+	
+	      tempContext.restore();
+	
+	      return gradientPattern;
+	    }
+	  }]);
+	
+	  return MultiAuraStep;
+	}();
+	
+	exports.default = MultiAuraStep;
+
+/***/ },
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global require, document */
@@ -8160,7 +8691,7 @@
 	exports.default = JsonElement;
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports) {
 
 	/* global document, setTimeout */
@@ -8272,7 +8803,7 @@
 	exports.default = Threeup;
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports) {
 
 	/* global document */
@@ -8421,12 +8952,12 @@
 	exports.default = Controls;
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./horizon/_timings-fast.js": 39,
-		"./next/_timings-fast.js": 40
+		"./horizon/_timings-fast.js": 41,
+		"./next/_timings-fast.js": 42
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -8439,11 +8970,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 38;
+	webpackContext.id = 40;
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -8534,124 +9065,6 @@
 	  NAME: 'chrome',
 	  DURATION: 2
 	}];
-
-/***/ },
-/* 40 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	// All times are in seconds
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
-	  NAME: 'flash',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'analyze',
-	  DURATION: 1
-	}];
-	
-	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'complete',
-	  DURATION: 0.2
-	}];
-	
-	// times are in seconds.
-	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'forehead',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'eyes',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'ears',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'nose',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'mouth',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'chin',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 0.2
-	}];
-	
-	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 0.2
-	}, {
-	  NAME: 'allFeatures',
-	  DURATION: 0.3
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 0.2
-	}];
-	
-	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 1
-	}, {
-	  NAME: 'animateInVignette',
-	  DURATION: 1
-	}, {
-	  NAME: 'animateInHalo',
-	  DURATION: 1
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 1
-	}];
-	
-	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
-	  DURATION: 1
-	}, {
-	  NAME: 'pause',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 0.2
-	}];
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./horizon/_timings-finalOnly.js": 42,
-		"./next/_timings-finalOnly.js": 43
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 41;
-
 
 /***/ },
 /* 42 */
@@ -8664,6 +9077,124 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 0.2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 0.2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 0.3
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 0.2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 1
+	}, {
+	  NAME: 'animateInVignette',
+	  DURATION: 1
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 1
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 1
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInMultiAura',
+	  DURATION: 1
+	}, {
+	  NAME: 'pause',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 0.2
+	}];
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-finalOnly.js": 44,
+		"./next/_timings-finalOnly.js": 45
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 43;
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
 	
 	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
@@ -8697,76 +9228,6 @@
 	  NAME: 'chrome',
 	  DURATION: 0
 	}];
-
-/***/ },
-/* 43 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	// All times are in seconds
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
-	
-	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0
-	}];
-	
-	// times are in seconds.
-	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
-	
-	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
-	
-	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInVignette',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInHalo',
-	  DURATION: 0
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 0
-	}];
-	
-	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
-	  DURATION: 0
-	}, {
-	  NAME: 'pause',
-	  DURATION: 0
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 0
-	}];
-
-/***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./horizon/_timings-noFace.js": 45,
-		"./next/_timings-noFace.js": 46
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 44;
-
 
 /***/ },
 /* 45 */
@@ -8783,6 +9244,76 @@
 	
 	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
 	  NAME: 'zoomOut',
+	  DURATION: 0
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInVignette',
+	  DURATION: 0
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 0
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 0
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInMultiAura',
+	  DURATION: 0
+	}, {
+	  NAME: 'pause',
+	  DURATION: 0
+	}, {
+	  NAME: 'chrome',
+	  DURATION: 0
+	}];
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-noFace.js": 47,
+		"./next/_timings-noFace.js": 48
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 46;
+
+
+/***/ },
+/* 47 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
 	  DURATION: 0.5
 	}];
 	
@@ -8814,7 +9345,7 @@
 	}];
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -8862,12 +9393,12 @@
 	}];
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./horizon/_timings-noAura.js": 48,
-		"./next/_timings-noAura.js": 49
+		"./horizon/_timings-noAura.js": 50,
+		"./next/_timings-noAura.js": 51
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -8880,180 +9411,83 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 47;
+	webpackContext.id = 49;
 
-
-/***/ },
-/* 48 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	// All times are in seconds
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
-	  NAME: 'flash',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'analyze',
-	  DURATION: 1
-	}];
-	
-	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'complete',
-	  DURATION: 0.2
-	}];
-	
-	// times are in seconds.
-	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 2
-	}, {
-	  NAME: 'forehead',
-	  DURATION: 2
-	}, {
-	  NAME: 'eyes',
-	  DURATION: 2
-	}, {
-	  NAME: 'ears',
-	  DURATION: 2
-	}, {
-	  NAME: 'nose',
-	  DURATION: 2
-	}, {
-	  NAME: 'mouth',
-	  DURATION: 2
-	}, {
-	  NAME: 'chin',
-	  DURATION: 2
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 2
-	}];
-	
-	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 2
-	}, {
-	  NAME: 'allFeatures',
-	  DURATION: 5
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 2
-	}];
-	
-	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [];
-	
-	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
-
-/***/ },
-/* 49 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	// All times are in seconds
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
-	  NAME: 'flash',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'analyze',
-	  DURATION: 1
-	}];
-	
-	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'complete',
-	  DURATION: 0.2
-	}];
-	
-	// times are in seconds.
-	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 2
-	}, {
-	  NAME: 'forehead',
-	  DURATION: 2
-	}, {
-	  NAME: 'eyes',
-	  DURATION: 2
-	}, {
-	  NAME: 'ears',
-	  DURATION: 2
-	}, {
-	  NAME: 'nose',
-	  DURATION: 2
-	}, {
-	  NAME: 'mouth',
-	  DURATION: 2
-	}, {
-	  NAME: 'chin',
-	  DURATION: 2
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 2
-	}];
-	
-	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
-	  NAME: 'zoom',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'face',
-	  DURATION: 2
-	}, {
-	  NAME: 'allFeatures',
-	  DURATION: 5
-	}, {
-	  NAME: 'emotion',
-	  DURATION: 2
-	}];
-	
-	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [];
-	
-	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
 
 /***/ },
 /* 50 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var map = {
-		"./horizon/_timings-noChrome.js": 51,
-		"./next/_timings-noChrome.js": 52
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 50;
-
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 5
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
 
 /***/ },
 /* 51 */
@@ -9126,24 +9560,34 @@
 	  DURATION: 2
 	}];
 	
-	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 2
-	}, {
-	  NAME: 'animateInHalo',
-	  DURATION: 4
-	}];
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [];
 	
-	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 2
-	}, {
-	  NAME: 'animateInHaloMulti',
-	  DURATION: 4
-	}];
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [];
 
 /***/ },
 /* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-noChrome.js": 53,
+		"./next/_timings-noChrome.js": 54
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 52;
+
+
+/***/ },
+/* 53 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9215,44 +9659,19 @@
 	
 	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
 	  NAME: 'animateInBackground',
-	  DURATION: 1
-	}, {
-	  NAME: 'animateInVignette',
 	  DURATION: 2
 	}, {
 	  NAME: 'animateInHalo',
-	  DURATION: 3
+	  DURATION: 4
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
-	  DURATION: 1
+	  NAME: 'animateInBackground',
+	  DURATION: 2
 	}, {
-	  NAME: 'pause',
-	  DURATION: 0.5
+	  NAME: 'animateInHaloMulti',
+	  DURATION: 4
 	}];
-
-/***/ },
-/* 53 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./horizon/_timings-finalOnlyNoChrome.js": 54,
-		"./next/_timings-finalOnlyNoChrome.js": 55
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 53;
-
 
 /***/ },
 /* 54 */
@@ -9265,6 +9684,118 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	  NAME: 'flash',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'analyze',
+	  DURATION: 1
+	}];
+	
+	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
+	  NAME: 'zoomOut',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'complete',
+	  DURATION: 0.2
+	}];
+	
+	// times are in seconds.
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'forehead',
+	  DURATION: 2
+	}, {
+	  NAME: 'eyes',
+	  DURATION: 2
+	}, {
+	  NAME: 'ears',
+	  DURATION: 2
+	}, {
+	  NAME: 'nose',
+	  DURATION: 2
+	}, {
+	  NAME: 'mouth',
+	  DURATION: 2
+	}, {
+	  NAME: 'chin',
+	  DURATION: 2
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	  NAME: 'zoom',
+	  DURATION: 0.5
+	}, {
+	  NAME: 'face',
+	  DURATION: 2
+	}, {
+	  NAME: 'allFeatures',
+	  DURATION: 5
+	}, {
+	  NAME: 'emotion',
+	  DURATION: 2
+	}];
+	
+	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
+	  NAME: 'animateInBackground',
+	  DURATION: 1
+	}, {
+	  NAME: 'animateInVignette',
+	  DURATION: 2
+	}, {
+	  NAME: 'animateInHalo',
+	  DURATION: 3
+	}];
+	
+	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
+	  NAME: 'animateInMultiAura',
+	  DURATION: 1
+	}, {
+	  NAME: 'pause',
+	  DURATION: 0.5
+	}];
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./horizon/_timings-finalOnlyNoChrome.js": 56,
+		"./next/_timings-finalOnlyNoChrome.js": 57
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 55;
+
+
+/***/ },
+/* 56 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	// All times are in seconds
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
 	
 	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
@@ -9294,7 +9825,7 @@
 	}];
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9333,12 +9864,12 @@
 	}];
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./horizon/_timings.js": 57,
-		"./next/_timings.js": 58
+		"./horizon/_timings.js": 59,
+		"./next/_timings.js": 60
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -9351,11 +9882,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 56;
+	webpackContext.id = 58;
 
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9448,7 +9979,7 @@
 	}];
 
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9544,16 +10075,16 @@
 	}];
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(60);
+	var content = __webpack_require__(62);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(62)(content, {});
+	var update = __webpack_require__(64)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -9570,10 +10101,10 @@
 	}
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(61)();
+	exports = module.exports = __webpack_require__(63)();
 	// imports
 	
 	
@@ -9584,7 +10115,7 @@
 
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports) {
 
 	/*
@@ -9640,7 +10171,7 @@
 
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*

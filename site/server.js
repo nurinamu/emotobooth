@@ -512,6 +512,14 @@ function runPhantomPhotoStrip(childArgs) {
   }
 }
 
+function compareScore(a,b) {
+  if (a.score < b.score)
+    return 1;
+  if (a.score > b.score)
+    return -1;
+  return 0;
+}
+
 function processFinalImages(sess) {
   console.log('PROCESS FINAL IMAGES');
   saveSession(sess);
@@ -542,8 +550,6 @@ function processFinalImages(sess) {
     const finalSessionID = (new Date()).getTime();
     sess.id = finalSessionID
 
-    const photostripImages = [];
-
     // Use overall session id to create a photostrip image path
     const photostripPath = config.photostripDir + finalSessionID + '/';
     //const renderPhotoStripPath = config.printDir + finalSessionID + '/';
@@ -554,15 +560,28 @@ function processFinalImages(sess) {
       fs.mkdirSync(photostripPath);
     }
 
+    const photostripImages = [];
+    const scoredPhotos = [];
+
     // Copy each chromeless photo to the photostrip folder
     for (let key in sess) {
-      if(sess[key].wasProcessed) {
-        const imageName = sess[key].id + '.jpg'
-        const filePath = photostripPath + imageName;
-        photostripImages.push(imageName);
-        fs.createReadStream(sess[key].chromelessPath).pipe(fs.createWriteStream(filePath));
+      if(sess[key].wasProcessed) {        
+        if (sess[key].score > 1) {
+          scoredPhotos.push({key: key, score: sess[key].score});
+        }
       }
     }
+
+    scoredPhotos.sort(compareScore);
+
+    scoredPhotos.forEach((photo, index) => {
+      if (index < 4) {
+        const imageName = `${ sess[photo.key].id }.jpg`
+        const filePath = photostripPath + imageName;
+        photostripImages.push(imageName);
+        fs.createReadStream(sess[photo.key].chromelessPath).pipe(fs.createWriteStream(filePath));
+      }
+    });
 
     var childArgs = [
       path.join(__dirname, 'scripts/phantomPhotostripProcess.js'),
@@ -570,6 +589,11 @@ function processFinalImages(sess) {
       renderPhotoStripPath,
       photostripImages
     ];
+
+    // "emotions":["angerLikelihood","surpriseLikelihood"],"score":258
+
+    // sess[key].emotions = scoreData.emotions;
+    // sess[key].score = score;
 
     runPhantomPhotoStrip(childArgs);
 
