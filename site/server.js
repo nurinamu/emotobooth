@@ -205,9 +205,11 @@ function connectJob(jobName, func) {
 
 function scoreImageData(data) {
   let score = 0;
-  let emotions = [];
+  const emotions = [];
+  let faces = 0;
   if (data.responses) {
     if (data.responses[0].faceAnnotations) {
+      faces = data.responses[0].faceAnnotations.length;
       data.responses[0].faceAnnotations.forEach((face) => {
         score += 40;
         EMOTIONS.NAMES.forEach((emotion) => {
@@ -224,7 +226,7 @@ function scoreImageData(data) {
       });
     }
   }
-  return {score, emotions};
+  return {score, emotions, faces};
 }
 
 function scoreSession(sess) {
@@ -232,11 +234,13 @@ function scoreSession(sess) {
   let highestScoredKey = null;
   for (const key in sess) {
     if (key !== 'complete') {
-      let image = sess[key];
-      let scoreData = scoreImageData(JSON.parse(fs.readFileSync(config.outDir + image.id + '-resp.json', 'utf8')));
-      var score = scoreData.score;
+      const image = sess[key];
+      const scoreData = scoreImageData(JSON.parse(fs.readFileSync(config.outDir + image.id + '-resp.json', 'utf8')));
+      const score = scoreData.score;
       sess[key].emotions = scoreData.emotions;
       sess[key].score = score;
+      sess[key].faces = scoreData.faces;
+      // data.responses[0].faceAnnotations
       if (score > highScore) {
         highScore = score;
         highestScoredKey = key;
@@ -553,7 +557,7 @@ function processFinalImages(sess) {
     // Use overall session id to create a photostrip image path
     const photostripPath = config.photostripDir + finalSessionID + '/';
     //const renderPhotoStripPath = config.printDir + finalSessionID + '/';
-    const renderPhotoStripPath = config.printDir + finalSessionID + '-photostrip.jpg';
+    const renderPhotoStripPath = config.printDir + finalSessionID;
 
     // If the folder doesn't exist, create it
     if (!fs.existsSync(photostripPath)){
@@ -576,8 +580,15 @@ function processFinalImages(sess) {
 
     scoredPhotos.sort(compareScore);
 
+    let numberOfFaces = 1;
+
     // Then push the unscored images
     for (let key in sess) {
+      if(sess[key].faces){
+        if (sess[key].faces > numberOfFaces) {
+          numberOfFaces = sess[key].faces;
+        }
+      }
       if(sess[key].wasProcessed) {        
         if (sess[key].score <= 1) {
           scoredPhotos.push({key: key, score: sess[key].score});
@@ -594,19 +605,17 @@ function processFinalImages(sess) {
       }
     });
 
-    var childArgs = [
-      path.join(__dirname, 'scripts/phantomPhotostripProcess.js'),
-      photostripPath,
-      renderPhotoStripPath,
-      photostripImages
-    ];
-
-    // "emotions":["angerLikelihood","surpriseLikelihood"],"score":258
-
-    // sess[key].emotions = scoreData.emotions;
-    // sess[key].score = score;
-
-    runPhantomPhotoStrip(childArgs);
+    // Call print function depending on how many faces there are
+    const printFaces = Math.ceil(numberOfFaces / 2);
+    for(let i = 0; i < printFaces; i++) {
+      const childArgs = [
+        path.join(__dirname, 'scripts/phantomPhotostripProcess.js'),
+        photostripPath,
+        `${ renderPhotoStripPath }-photostrip-${ i }.jpg`,
+        photostripImages
+      ];
+      runPhantomPhotoStrip(childArgs);
+    }
 
     // if (argv.share) {
     //   socialPublisher.share(sess);
