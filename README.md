@@ -77,6 +77,7 @@ There are several querystrings that can be added to the main page's url to affec
 - `showgrid`: **the exception; we will want to use this on one of the production screens** shows the grid / historical view rather than the json / latest view.
 - `zoom`: resize UI so panels can fit, based on width, in your window.
 - `controls`: in json view, adds toolbar with shortcuts to taking certain photos to bottom of screen
+- `dontprint`: tells the application not to render final photostrip to the `site/out-print` folder
 - `prepopulate`: in grid view, uses pregenerated images to fill out grid if we don't actually have enough historical images to do so. Otherwise, only historical processed images will be used.
 - Timing options: to speed up or skip steps of the sequence. Defaults to `normal`.
   - `timing=fast&`: all steps run, but faster than usual.
@@ -84,6 +85,9 @@ There are several querystrings that can be added to the main page's url to affec
   - `timing=noFace&`: all face-related steps are skipped; only aura animates in.
   - `timing=noAura&`: all face-related steps run, and then the animation stops.
   - `timing=noChrome&`: all face and aura animations run, but chrome does not render.
+- Event options: Emotobooth supports multiple designs for different events, these are added and handled inside of main.js, here are the currently supported events
+  - `event=horizon`
+  - `event=next`
 
 ## Frontend Details
 
@@ -183,10 +187,54 @@ Mitsubishi Printer Instructions
 
 These are instructions for setting up the Mitsubishi K60 printer to a Mac that has the Emotobooth project set up, so photostrips generated from the app will automatically be sent to the printer at the correct size.
 
-### Install Drivers:
+Mitsubishi Printer Drivers are available at [http://www.mitsubishielectric-printing.com/support/drivers](http://www.mitsubishielectric-printing.com/support/drivers)
 
-* Go To: [http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/drivers_printers_digi_en.htm](http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/drivers_printers_digi_en.htm)
-* Download the Mac/OS drivers for 60
+### PC Instructions
+
+#### Install Drivers:
+
+* Open "Device Manager"
+* Under Printers find Mitsubishi CP-K60DW-S, right click and select Update Driver Software
+* Click Browse my computer for driver software and select the folder you downloaded the Drivers to
+* Close Device Manager
+* Open "Devices and Printers"
+* Right click on the K60 printer and select "Set as default printer"
+* Right click again and select Printing preferences
+* For Paper Size select 5x15x2 Type1(2x6"x2)
+* For Orientation select Portrait
+* For Scaling set to 100%
+* Click OK
+* Right click the printer again and select Printer properties
+* Click the advanced tab
+* Click the Printing Defaults... button
+* Select the same options you chose for Printing preferences
+* Click OK
+
+#### Install Folder Agent:
+
+Folder Agent watches the print folder and sends photostrips to the printer to be printed.
+
+* Download Folder Agent from [http://www.folderagent.com](http://www.folderagent.com) and install it
+* Open folder agent
+* Create a new Folder Monitor
+* Select the "site/out-print" folder from the Emotobooth application folder
+* Click the + to add a new action
+* Under the Execute tab, select PowerShellScript
+* Replace the content with the following: ```C:\WINDOWS\System32\rundll32 C:\WINDOWS\System32\shimgvw.dll,ImageView_PrintTo "$path" "MITSUBISHI CP-K60DW-S"```
+* Click OK
+* Add another action, under the Advanced tab select Sleep, Click Add
+* Add another action, select Move File
+* Click Move File and click the ... next to Destination Folder, click Insert and then Browse for folder
+* Select or create the site/out-printed folder
+* Click OK
+* Click Save, if prompted about existing files, click Yes
+* Leave Folder Agent running
+
+### Mac Instructions
+
+#### Install Drivers:
+
+* Download the Mac/OS drivers for CP-K60DW-S
 * Install the drivers
 * Restart your computer
 * Open Printer & Scanners System Preference Window
@@ -196,7 +244,7 @@ These are instructions for setting up the Mitsubishi K60 printer to a Mac that h
 
 [Direct link to drivers](http://www.mitsubishi-photo.cz/drivers/drivers_printers/cz_en/cpk60dws/CPK60DW-S_Mac_Ver100.zip)
 
-### Setting Default Print Size:
+#### Setting Default Print Size:
 
 * In Terminal enter: cupsctl WebInterface=yes
 * Enter your username/password when prompted
@@ -206,7 +254,7 @@ These are instructions for setting up the Mitsubishi K60 printer to a Mac that h
 * Select “Set default options”
 * Under Media Size, select “5x15x2 Type1(2x6”x2)
 
-### Setting Default Print Preferences:
+#### Setting Default Print Preferences:
 
 * Open an image in preview
 * File > Print
@@ -222,7 +270,7 @@ These are instructions for setting up the Mitsubishi K60 printer to a Mac that h
 * Select PhotoStrips
 * Hit Cancel
 
-### Setting Automator to look for new photos:
+#### Setting Automator to look for new photos:
 
 * Open Automator
 * Create a new Folder Action

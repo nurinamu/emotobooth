@@ -440,10 +440,10 @@ export default class CanvasUtils {
       if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
         baseRadius = this.imageElement.hexR;
       }
-      if (baseRadius > MAX_GROUP_RADIUS) {
-        baseRadius = MAX_GROUP_RADIUS;
+      if (baseRadius > MAX_GROUP_RADIUS * this.shapeScale) {
+        baseRadius = MAX_GROUP_RADIUS * this.shapeScale;
       }
-      baseRadius = baseRadius * this.shapeScale;
+      // baseRadius = baseRadius * this.shapeScale;
     }
 
     return baseRadius;

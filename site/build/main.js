@@ -4688,10 +4688,10 @@
 	        if (this.imageElement.hexR > BASE_GROUP_RADIUS) {
 	          baseRadius = this.imageElement.hexR;
 	        }
-	        if (baseRadius > MAX_GROUP_RADIUS) {
-	          baseRadius = MAX_GROUP_RADIUS;
+	        if (baseRadius > MAX_GROUP_RADIUS * this.shapeScale) {
+	          baseRadius = MAX_GROUP_RADIUS * this.shapeScale;
 	        }
-	        baseRadius = baseRadius * this.shapeScale;
+	        // baseRadius = baseRadius * this.shapeScale;
 	      }
 	
 	      return baseRadius;
@@ -7891,7 +7891,7 @@
 	        this.particles.push({
 	          x: xPoint,
 	          y: yPoint,
-	          size: 2,
+	          size: 2 * this.shapeScale,
 	          speed: (Math.random() * 0.5 + 0.5) / 30,
 	          radius: Math.random() * 10 + 2
 	        });

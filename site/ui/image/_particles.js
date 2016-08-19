@@ -83,7 +83,7 @@ export default class Particles {
       this.particles.push({
         x: xPoint,
         y: yPoint,
-        size: 2,
+        size: 2 * this.shapeScale,
         speed: ((Math.random() * 0.5) + 0.5) / 30,
         radius: (Math.random() * 10) + 2
       });
