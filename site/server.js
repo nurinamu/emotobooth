@@ -563,7 +563,9 @@ function processFinalImages(sess) {
     const photostripImages = [];
     const scoredPhotos = [];
 
-    // Copy each chromeless photo to the photostrip folder
+   // Copy each chromeless photo to the photostrip folder
+
+    // First push the scored images
     for (let key in sess) {
       if(sess[key].wasProcessed) {        
         if (sess[key].score > 1) {
@@ -573,6 +575,15 @@ function processFinalImages(sess) {
     }
 
     scoredPhotos.sort(compareScore);
+
+    // Then push the unscored images
+    for (let key in sess) {
+      if(sess[key].wasProcessed) {        
+        if (sess[key].score <= 1) {
+          scoredPhotos.push({key: key, score: sess[key].score});
+        }
+      }
+    }
 
     scoredPhotos.forEach((photo, index) => {
       if (index < 4) {
