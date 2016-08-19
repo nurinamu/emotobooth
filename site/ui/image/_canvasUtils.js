@@ -443,14 +443,12 @@ export default class CanvasUtils {
       if (baseRadius > MAX_GROUP_RADIUS * this.shapeScale) {
         baseRadius = MAX_GROUP_RADIUS * this.shapeScale;
       }
-      // baseRadius = baseRadius * this.shapeScale;
     }
 
     return baseRadius;
   }
 
   createShapeBackground(opacityProgress) {
-    // const opacity = opacityProgress * 0.75;
     const opacity = opacityProgress;
     this.imageElement.context.save();
     this.imageElement.context.moveTo(0, 0);
@@ -477,7 +475,9 @@ export default class CanvasUtils {
       circleOffset = CIRCLE_GROUP_OFFSET;
     }
 
-    const fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false); // 0.45, 0.5 // 0.3, 0.4
+    // console.log(baseRadius, this.imageElement.canvas.height)
+
+    const fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false, 0, 0.3);
 
     this.imageElement.context.globalCompositeOperation = 'screen';
     this.imageElement.context.fillStyle = fillColor;
@@ -488,7 +488,7 @@ export default class CanvasUtils {
     this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
     this.imageElement.context.lineTo(0, 0);
 
-    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+    this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius-20, 0, Math.PI * 2);
     this.imageElement.context.fill();
     this.imageElement.context.closePath();
 
@@ -534,7 +534,7 @@ export default class CanvasUtils {
       this.imageElement.context.globalCompositeOperation = 'source-over';
       this.imageElement.context.strokeStyle = emoColor;
       this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
-      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.translate(0, -30);
       this.imageElement.context.beginPath();
 
       this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, (Math.PI * 2) * perc);
@@ -565,7 +565,7 @@ export default class CanvasUtils {
 
     this.imageElement.context.restore();
     this.imageElement.context.save();
-    this.imageElement.context.translate(0, 0);
+    this.imageElement.context.translate(0, -30);
     this.imageElement.context.strokeStyle = emoColor;
     this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
     this.imageElement.context.globalCompositeOperation = blendMode;
@@ -604,7 +604,7 @@ export default class CanvasUtils {
 
       this.imageElement.context.restore();
       this.imageElement.context.save();
-      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.translate(0, -30);
       this.imageElement.context.strokeStyle = emoColor;
       this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
       this.imageElement.context.globalCompositeOperation = blendMode;
@@ -621,7 +621,7 @@ export default class CanvasUtils {
 
       this.imageElement.context.restore();
       this.imageElement.context.save();
-      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.translate(0, -30);
       this.imageElement.context.strokeStyle = emoColor;
       this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
       this.imageElement.context.globalCompositeOperation = blendMode;
@@ -636,7 +636,7 @@ export default class CanvasUtils {
 
       this.imageElement.context.restore();
       this.imageElement.context.save();
-      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.translate(0, -30);
       this.imageElement.context.strokeStyle = emoColor;
       this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
       this.imageElement.context.globalCompositeOperation = blendMode;
@@ -649,7 +649,7 @@ export default class CanvasUtils {
 
       this.imageElement.context.restore();
       this.imageElement.context.save();
-      this.imageElement.context.translate(0, 0);
+      this.imageElement.context.translate(0, -30);
       this.imageElement.context.strokeStyle = emoColor;
       this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
       this.imageElement.context.globalCompositeOperation = blendMode;

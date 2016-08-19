@@ -52,8 +52,8 @@ export default class HaloStep {
         if (group) {
           gradient.addColorStop(0, getStrongestColor(this.imageElement)[1]);
         } else {
-          // gradient.addColorStop(0, colorUtils.TRANSPARENT);
-          gradient.addColorStop(0, this.imageElement.treatments.treatment.halo.innerColor);
+          gradient.addColorStop(0, colorUtils.TRANSPARENT);
+          gradient.addColorStop(0.1, this.imageElement.treatments.treatment.halo.innerColor);
 
           if (this.imageElement.treatments.treatment.halo.outerColor !== colorUtils.TRANSPARENT) {
             gradient.addColorStop(0.5, this.imageElement.treatments.treatment.halo.outerColor);
@@ -75,7 +75,8 @@ export default class HaloStep {
         if (group) {
           this.context.fillStyle = this.canvasUtils.createSimpleGradient(getStrongestColor(this.imageElement)[0], colorUtils.TRANSPARENT, r, false);
         } else {
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, r, false);
+          // this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, r, false, 0, 0.3); //, 0.25, 0.3
+          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.TRANSPARENT, this.imageElement.treatments.treatment.halo.outerColor, r, false, 0.15, 0.3);
         }
 
         this.context.globalCompositeOperation = 'source-over';
@@ -87,7 +88,7 @@ export default class HaloStep {
         let r2;
         if (group) {
           r2 = ease.expOut(0, (this.imageElement.hexR * (3) / this.canvas.height), progress);
-          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(getStrongestColor(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false); // 0.4, 1
+          this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha(getStrongestColor(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false);
           this.context.globalAlpha = alpha2;
           this.context.fill();
         }

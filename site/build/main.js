@@ -4691,7 +4691,6 @@
 	        if (baseRadius > MAX_GROUP_RADIUS * this.shapeScale) {
 	          baseRadius = MAX_GROUP_RADIUS * this.shapeScale;
 	        }
-	        // baseRadius = baseRadius * this.shapeScale;
 	      }
 	
 	      return baseRadius;
@@ -4699,7 +4698,6 @@
 	  }, {
 	    key: 'createShapeBackground',
 	    value: function createShapeBackground(opacityProgress) {
-	      // const opacity = opacityProgress * 0.75;
 	      var opacity = opacityProgress;
 	      this.imageElement.context.save();
 	      this.imageElement.context.moveTo(0, 0);
@@ -4726,7 +4724,9 @@
 	        circleOffset = CIRCLE_GROUP_OFFSET;
 	      }
 	
-	      var fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false); // 0.45, 0.5 // 0.3, 0.4
+	      // console.log(baseRadius, this.imageElement.canvas.height)
+	
+	      var fillColor = this.createSimpleGradient(colorUtils.TRANSPARENT, color, 0, false, 0, 0.3);
 	
 	      this.imageElement.context.globalCompositeOperation = 'screen';
 	      this.imageElement.context.fillStyle = fillColor;
@@ -4737,7 +4737,7 @@
 	      this.imageElement.context.lineTo(this.imageElement.canvasWidth, 0);
 	      this.imageElement.context.lineTo(0, 0);
 	
-	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2);
+	      this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius - 20, 0, Math.PI * 2);
 	      this.imageElement.context.fill();
 	      this.imageElement.context.closePath();
 	
@@ -4785,7 +4785,7 @@
 	        this.imageElement.context.globalCompositeOperation = 'source-over';
 	        this.imageElement.context.strokeStyle = emoColor;
 	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
-	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.translate(0, -30);
 	        this.imageElement.context.beginPath();
 	
 	        this.imageElement.context.arc(this.imageElement.eyesMidpoint.x, this.imageElement.eyesMidpoint.y + circleOffset, baseRadius, 0, Math.PI * 2 * perc);
@@ -4817,7 +4817,7 @@
 	
 	      this.imageElement.context.restore();
 	      this.imageElement.context.save();
-	      this.imageElement.context.translate(0, 0);
+	      this.imageElement.context.translate(0, -30);
 	      this.imageElement.context.strokeStyle = emoColor;
 	      this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	      this.imageElement.context.globalCompositeOperation = blendMode;
@@ -4856,7 +4856,7 @@
 	
 	        this.imageElement.context.restore();
 	        this.imageElement.context.save();
-	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.translate(0, -30);
 	        this.imageElement.context.strokeStyle = emoColor;
 	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	        this.imageElement.context.globalCompositeOperation = blendMode;
@@ -4873,7 +4873,7 @@
 	
 	        this.imageElement.context.restore();
 	        this.imageElement.context.save();
-	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.translate(0, -30);
 	        this.imageElement.context.strokeStyle = emoColor;
 	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	        this.imageElement.context.globalCompositeOperation = blendMode;
@@ -4888,7 +4888,7 @@
 	
 	        this.imageElement.context.restore();
 	        this.imageElement.context.save();
-	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.translate(0, -30);
 	        this.imageElement.context.strokeStyle = emoColor;
 	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	        this.imageElement.context.globalCompositeOperation = blendMode;
@@ -4901,7 +4901,7 @@
 	
 	        this.imageElement.context.restore();
 	        this.imageElement.context.save();
-	        this.imageElement.context.translate(0, 0);
+	        this.imageElement.context.translate(0, -30);
 	        this.imageElement.context.strokeStyle = emoColor;
 	        this.imageElement.context.lineWidth = LINE_WIDTH * this.shapeScale;
 	        this.imageElement.context.globalCompositeOperation = blendMode;
@@ -7426,8 +7426,8 @@
 	          if (group) {
 	            gradient.addColorStop(0, (0, _animationUtils.getStrongestColor)(this.imageElement)[1]);
 	          } else {
-	            // gradient.addColorStop(0, colorUtils.TRANSPARENT);
-	            gradient.addColorStop(0, this.imageElement.treatments.treatment.halo.innerColor);
+	            gradient.addColorStop(0, colorUtils.TRANSPARENT);
+	            gradient.addColorStop(0.1, this.imageElement.treatments.treatment.halo.innerColor);
 	
 	            if (this.imageElement.treatments.treatment.halo.outerColor !== colorUtils.TRANSPARENT) {
 	              gradient.addColorStop(0.5, this.imageElement.treatments.treatment.halo.outerColor);
@@ -7449,7 +7449,8 @@
 	          if (group) {
 	            this.context.fillStyle = this.canvasUtils.createSimpleGradient((0, _animationUtils.getStrongestColor)(this.imageElement)[0], colorUtils.TRANSPARENT, _r, false);
 	          } else {
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, _r, false);
+	            // this.context.fillStyle = this.canvasUtils.createSimpleGradient(this.imageElement.treatments.treatment.halo.innerColor, this.imageElement.treatments.treatment.halo.outerColor, r, false, 0, 0.3); //, 0.25, 0.3
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.TRANSPARENT, this.imageElement.treatments.treatment.halo.outerColor, _r, false, 0.15, 0.3);
 	          }
 	
 	          this.context.globalCompositeOperation = 'source-over';
@@ -7461,7 +7462,7 @@
 	          var r2 = void 0;
 	          if (group) {
 	            r2 = ease.expOut(0, this.imageElement.hexR * 3 / this.canvas.height, progress);
-	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha((0, _animationUtils.getStrongestColor)(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false); // 0.4, 1
+	            this.context.fillStyle = this.canvasUtils.createSimpleGradient(colorUtils.subAlpha((0, _animationUtils.getStrongestColor)(this.imageElement)[1], 1), colorUtils.TRANSPARENT, r2, false);
 	            this.context.globalAlpha = alpha2;
 	            this.context.fill();
 	          }
@@ -8133,6 +8134,8 @@
 	
 	      var gradient = tempContext.createRadialGradient(x, y, 0, x, y, radius);
 	
+	      gradient.addColorStop(0, colorUtils.TRANSPARENT);
+	      console.log(1 - feather / radius);
 	      gradient.addColorStop(1 - feather / radius, reverse ? colorUtils.TRANSPARENT : colorUtils.BLACK);
 	      gradient.addColorStop(1, reverse ? colorUtils.BLACK : colorUtils.TRANSPARENT);
 	

@@ -34,6 +34,8 @@ export default class MultiAuraStep {
 
     const gradient = tempContext.createRadialGradient(x, y, 0, x, y, radius);
 
+    gradient.addColorStop(0, colorUtils.TRANSPARENT);
+    console.log(1 - (feather/radius));
     gradient.addColorStop(1 - (feather/radius), reverse ? colorUtils.TRANSPARENT : colorUtils.BLACK);
     gradient.addColorStop(1, reverse ? colorUtils.BLACK : colorUtils.TRANSPARENT);
 
