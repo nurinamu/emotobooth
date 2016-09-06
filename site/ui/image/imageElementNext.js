@@ -177,6 +177,7 @@ export default class ImageElement extends PanelComponent {
       this.auraAnimations = null;
       this.offsetX = 0;
       this.offsetY = 0;
+      this.savedBackgroundImage = null;
     });
   }
 

@@ -886,6 +886,7 @@
 	        _this4.auraAnimations = null;
 	        _this4.offsetX = 0;
 	        _this4.offsetY = 0;
+	        _this4.savedBackgroundImage = null;
 	      });
 	    }
 	  }, {
@@ -4329,7 +4330,12 @@
 	        this.imageElement.offsetX = (this.imageElement.subRect.width - this.imageElement.image.width) / 2 / this.imageElement.resizedImageScale;
 	        this.imageElement.offsetY = (this.imageElement.subRect.height - this.imageElement.image.height) / this.imageElement.resizedImageScale;
 	
-	        this.imageElement.context.drawImage(this.imageElement.image, 0, 0, this.imageElement.image.width, this.imageElement.image.height, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.canvas.width - 2 * this.imageElement.offsetX, this.imageElement.canvas.height - this.imageElement.offsetY);
+	        if (!this.imageElement.savedBackgroundImage) {
+	          this.imageElement.context.drawImage(this.imageElement.image, 0, 0, this.imageElement.image.width, this.imageElement.image.height, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.canvas.width - 2 * this.imageElement.offsetX, this.imageElement.canvas.height - this.imageElement.offsetY);
+	          this.imageElement.savedBackgroundImage = this.context.createPattern(this.canvas, 'no-repeat');
+	        } else {
+	          this.imageElement.context.fillStyle = this.imageElement.savedBackgroundImage;
+	        }
 	
 	        this.imageElement.resizedImageOffset = {
 	          x: this.imageElement.offsetX * -1 * this.imageElement.resizedImageScale,
@@ -5172,7 +5178,7 @@
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* global require */
+	/* global require, requestAnimationFrame, window */
 	
 	'use strict';
 	
@@ -5215,6 +5221,12 @@
 	    this.context = context;
 	    this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
 	    this.pointUtils = new _pointUtils2.default(imageElement);
+	    this.progress = 0;
+	    this.targetLeft = 0;
+	    this.targetTop = 0;
+	    this.killZoomUpdate = false;
+	    this.setWidth = 0;
+	    this.setHeight = 0;
 	  }
 	
 	  _createClass(ZoomStep, [{
@@ -5225,6 +5237,32 @@
 	      this.context = null;
 	      this.canvasUtils = null;
 	      this.pointUtils = null;
+	      this.progress = 0;
+	      this.killZoomUpdate = false;
+	      this.targetLeft = null;
+	      this.targetTop = null;
+	      this.setWidth = 0;
+	      this.setHeight = 0;
+	    }
+	  }, {
+	    key: 'updateZoom',
+	    value: function updateZoom() {
+	      if (!this.killZoomUpdate) {
+	        requestAnimationFrame(this.updateZoom.bind(this));
+	      }
+	
+	      var prog = this.progress;
+	      var currX = this.imageElement.offsetX - (this.imageElement.offsetX - this.targetLeft) * prog;
+	      var currY = this.imageElement.offsetY - (this.imageElement.offsetY - this.targetTop) * prog;
+	
+	      var currWidth = this.imageElement.width - (this.imageElement.width - this.setWidth) * prog;
+	      var currHeight = this.imageElement.height - (this.imageElement.height - this.setHeight) * prog;
+	
+	      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	
+	      this.canvasUtils.fillBackground();
+	
+	      this.context.drawImage(this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, this.canvas.width, this.canvas.height);
 	    }
 	  }, {
 	    key: 'zoom',
@@ -5233,6 +5271,8 @@
 	
 	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
 	      var zoomOut = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	
+	      this.killZoomUpdate = false;
 	
 	      var topLeft = new geometryUtils.Point(utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].x), utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].y));
 	
@@ -5251,16 +5291,19 @@
 	        height = this.canvas.height / this.canvas.width * width;
 	      }
 	
-	      var targetLeft = Math.max(centerX - width / 2, 0);
-	      var targetTop = Math.max(centerY - height / 2, 0);
+	      this.targetLeft = Math.max(centerX - width / 2, 0);
+	      this.targetTop = Math.max(centerY - height / 2, 0);
 	
 	      if (zoomOut) {
 	        width = this.imageElement.subRect.width;
 	        height = this.imageElement.subRect.height;
 	
-	        targetLeft = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.x : 0;
-	        targetTop = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.y : 0;
+	        this.targetLeft = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.x : 0;
+	        this.targetTop = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.y : 0;
 	      }
+	
+	      this.setWidth = width;
+	      this.setHeight = height;
 	
 	      if (duration === 0) {
 	        this.imageElement.ifNotDrawing(function () {
@@ -5270,9 +5313,9 @@
 	
 	          _this.canvasUtils.fillBackground();
 	
-	          _this.context.drawImage(_this.imageElement.image, targetLeft, targetTop, _this.imageElement.width, _this.imageElement.height, 0, 0, _this.canvas.width, _this.canvas.height);
-	          _this.imageElement.offsetX = targetLeft;
-	          _this.imageElement.offsetY = targetTop;
+	          _this.context.drawImage(_this.imageElement.image, _this.targetLeft, _this.targetTop, _this.imageElement.width, _this.imageElement.height, 0, 0, _this.canvas.width, _this.canvas.height);
+	          _this.imageElement.offsetX = _this.targetLeft;
+	          _this.imageElement.offsetY = _this.targetTop;
 	          _this.imageElement.width = width;
 	          _this.imageElement.height = height;
 	          _this.imageElement.imageScale = width / _this.canvas.width;
@@ -5293,24 +5336,15 @@
 	            onStart: function onStart() {
 	              _this.imageElement.isDrawing = false;
 	              _this.imageElement.tweens.push(tween);
+	              _this.updateZoom();
 	            },
 	            onUpdate: function onUpdate() {
-	              var prog = tween.progress();
-	              var currX = _this.imageElement.offsetX - (_this.imageElement.offsetX - targetLeft) * prog;
-	              var currY = _this.imageElement.offsetY - (_this.imageElement.offsetY - targetTop) * prog;
-	
-	              var currWidth = _this.imageElement.width - (_this.imageElement.width - width) * prog;
-	              var currHeight = _this.imageElement.height - (_this.imageElement.height - height) * prog;
-	
-	              _this.context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
-	
-	              _this.canvasUtils.fillBackground();
-	
-	              _this.context.drawImage(_this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, _this.canvas.width, _this.canvas.height);
+	              _this.progress = tween.progress();
 	            },
 	            onComplete: function onComplete() {
-	              _this.imageElement.offsetX = targetLeft;
-	              _this.imageElement.offsetY = targetTop;
+	              _this.killZoomUpdate = true;
+	              _this.imageElement.offsetX = _this.targetLeft;
+	              _this.imageElement.offsetY = _this.targetTop;
 	              _this.imageElement.width = width;
 	              _this.imageElement.height = height;
 	              _this.imageElement.imageScale = width / _this.canvas.width;
@@ -7115,6 +7149,7 @@
 	        _this4.allDone = false;
 	        _this4.currentFrame = 0;
 	        _this4.shapesInit = false;
+	        _this4.savedBackgroundImage = null;
 	      });
 	    }
 	  }, {
@@ -7339,7 +7374,7 @@
 	
 	      this.canvasUtils.redrawBaseImage();
 	
-	      this.canvasUtils.createShapeBackground(progress * 0.75);
+	      this.canvasUtils.createShapeBackground(progress);
 	
 	      if (!this.circleStarted && progress !== 1) {
 	        this.circleStarted = true;

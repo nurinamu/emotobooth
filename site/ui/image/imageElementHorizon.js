@@ -201,6 +201,7 @@ export default class ImageElement extends PanelComponent {
       this.allDone = false;
       this.currentFrame = 0;
       this.shapesInit = false;
+      this.savedBackgroundImage = null;
     });
   }
 

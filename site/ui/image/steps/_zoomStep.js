@@ -1,4 +1,4 @@
-/* global require */
+/* global require, requestAnimationFrame, window */
 
 'use strict';
 
@@ -16,6 +16,12 @@ export default class ZoomStep {
     this.context = context;
     this.canvasUtils = new canvasUtils(imageElement, canvas, context);
     this.pointUtils = new pointUtils(imageElement);
+    this.progress = 0;
+    this.targetLeft = 0;
+    this.targetTop = 0;
+    this.killZoomUpdate = false;
+    this.setWidth = 0;
+    this.setHeight = 0;
   }
 
   kill() {
@@ -24,9 +30,36 @@ export default class ZoomStep {
     this.context = null;
     this.canvasUtils = null;
     this.pointUtils = null;
+    this.progress = 0;
+    this.killZoomUpdate = false;
+    this.targetLeft = null;
+    this.targetTop = null;
+    this.setWidth = 0;
+    this.setHeight = 0;
+  }
+
+  updateZoom() {
+    if (!this.killZoomUpdate) {
+      requestAnimationFrame(this.updateZoom.bind(this));
+    }
+
+    const prog = this.progress;
+    const currX = this.imageElement.offsetX - ((this.imageElement.offsetX - this.targetLeft) * prog);
+    const currY = this.imageElement.offsetY - ((this.imageElement.offsetY - this.targetTop) * prog);
+
+    const currWidth = this.imageElement.width - ((this.imageElement.width - this.setWidth) * prog);
+    const currHeight = this.imageElement.height - ((this.imageElement.height - this.setHeight) * prog);
+
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.canvasUtils.fillBackground();
+
+    this.context.drawImage(this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, this.canvas.width, this.canvas.height);
   }
 
   zoom(duration = 1, zoomOut = false) {
+    this.killZoomUpdate = false;
+
     const topLeft = new geometryUtils.Point(utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].x), utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].y));
 
     let width = Math.abs(topLeft.x - utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[1].x));
@@ -44,16 +77,19 @@ export default class ZoomStep {
       height = (this.canvas.height / this.canvas.width) * width;
     }
 
-    let targetLeft = Math.max(centerX - (width / 2), 0);
-    let targetTop = Math.max(centerY - (height / 2), 0);
+    this.targetLeft = Math.max(centerX - (width / 2), 0);
+    this.targetTop = Math.max(centerY - (height / 2), 0);
 
     if (zoomOut) {
       width = this.imageElement.subRect.width;
       height = this.imageElement.subRect.height;
 
-      targetLeft = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.x : 0;
-      targetTop = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.y : 0;
+      this.targetLeft = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.x : 0;
+      this.targetTop = this.imageElement.resizedImageOffset ? this.imageElement.resizedImageOffset.y : 0;
     }
+
+    this.setWidth = width;
+    this.setHeight = height;
 
     if (duration === 0) {
       this.imageElement.ifNotDrawing(() => {
@@ -63,9 +99,9 @@ export default class ZoomStep {
 
         this.canvasUtils.fillBackground();
 
-        this.context.drawImage(this.imageElement.image, targetLeft, targetTop, this.imageElement.width, this.imageElement.height, 0, 0, this.canvas.width, this.canvas.height);
-        this.imageElement.offsetX = targetLeft;
-        this.imageElement.offsetY = targetTop;
+        this.context.drawImage(this.imageElement.image, this.targetLeft, this.targetTop, this.imageElement.width, this.imageElement.height, 0, 0, this.canvas.width, this.canvas.height);
+        this.imageElement.offsetX = this.targetLeft;
+        this.imageElement.offsetY = this.targetTop;
         this.imageElement.width = width;
         this.imageElement.height = height;
         this.imageElement.imageScale = width / this.canvas.width;
@@ -86,24 +122,15 @@ export default class ZoomStep {
         onStart: () => {
           this.imageElement.isDrawing = false;
           this.imageElement.tweens.push(tween);
+          this.updateZoom();
         },
         onUpdate: () => {
-          const prog = tween.progress();
-          const currX = this.imageElement.offsetX - ((this.imageElement.offsetX - targetLeft) * prog);
-          const currY = this.imageElement.offsetY - ((this.imageElement.offsetY - targetTop) * prog);
-
-          const currWidth = this.imageElement.width - ((this.imageElement.width - width) * prog);
-          const currHeight = this.imageElement.height - ((this.imageElement.height - height) * prog);
-
-          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-          this.canvasUtils.fillBackground();
-
-          this.context.drawImage(this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, this.canvas.width, this.canvas.height);
+          this.progress = tween.progress();
         },
         onComplete: () => {
-          this.imageElement.offsetX = targetLeft;
-          this.imageElement.offsetY = targetTop;
+          this.killZoomUpdate = true;
+          this.imageElement.offsetX = this.targetLeft;
+          this.imageElement.offsetY = this.targetTop;
           this.imageElement.width = width;
           this.imageElement.height = height;
           this.imageElement.imageScale = width / this.canvas.width;

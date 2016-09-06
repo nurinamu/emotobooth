@@ -111,7 +111,12 @@ export default class CanvasUtils {
       this.imageElement.offsetX = ((this.imageElement.subRect.width - this.imageElement.image.width) / 2) / this.imageElement.resizedImageScale;
       this.imageElement.offsetY = (this.imageElement.subRect.height - this.imageElement.image.height) / this.imageElement.resizedImageScale;
 
-      this.imageElement.context.drawImage(this.imageElement.image, 0, 0, this.imageElement.image.width, this.imageElement.image.height, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.canvas.width - (2 * this.imageElement.offsetX), this.imageElement.canvas.height - this.imageElement.offsetY);
+      if (!this.imageElement.savedBackgroundImage) {
+        this.imageElement.context.drawImage(this.imageElement.image, 0, 0, this.imageElement.image.width, this.imageElement.image.height, this.imageElement.offsetX, this.imageElement.offsetY, this.imageElement.canvas.width - (2 * this.imageElement.offsetX), this.imageElement.canvas.height - this.imageElement.offsetY);
+        this.imageElement.savedBackgroundImage = this.context.createPattern(this.canvas, 'no-repeat');
+      } else {
+        this.imageElement.context.fillStyle = this.imageElement.savedBackgroundImage; 
+      }
 
       this.imageElement.resizedImageOffset = {
         x: this.imageElement.offsetX * -1 * this.imageElement.resizedImageScale,
