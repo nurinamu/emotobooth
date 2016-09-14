@@ -32,6 +32,7 @@ var socketIO = require('socket.io');
 var phantomjs = require('phantomjs-prebuilt')
 var phantomBinPath = phantomjs.path;
 var dontPrint = false;
+let socialPublisher;
 
 logger.level = 'debug';
 
@@ -83,7 +84,8 @@ client.hkeys("image-data", function (err, replies) {
 });
 
 if (CREDENTIALS) {
-  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+  console.log('FOUND CREDENTIALS');
+  socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
 }
 
 // Define job mapping
@@ -293,7 +295,7 @@ function sessionComplete(job, finish) {
         //   }
         // }
         // if (argv.share) {
-        // //socialPublisher.share(sess);
+        //   socialPublisher.share(sess);
         // }
         // sessionIsComplete = false;
       } else {
@@ -622,11 +624,11 @@ function processFinalImages(sess) {
       runPhantomPhotoStrip(childArgs);
     }
 
-    // if (argv.share) {
-    //   socialPublisher.share(sess);
-    // } else {
+    if (argv.share) {
+      socialPublisher.share(sess);
+    } else {
     saveSession(sess);
-    // }
+    }
     // sessionIsComplete = false;
   } else {
     console.log(`images processed ${done} / ${count}`);
