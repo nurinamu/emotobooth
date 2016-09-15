@@ -84,7 +84,6 @@ client.hkeys("image-data", function (err, replies) {
 });
 
 if (CREDENTIALS) {
-  console.log('FOUND CREDENTIALS');
   socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
 }
 
@@ -261,13 +260,15 @@ function scoreSession(sess) {
 //
 
 function sessionComplete(job, finish) {
-  var currSessionId = job.sessionId || sessionId;
+  var currSessionId = sessionId;
   sessionId++;
+  console.log('CURRENT SESSION ID: ', currSessionId);
   var sess = sessionImages[currSessionId];
   if (sess) {
     if (!sess.kill) {
       // sessionIsComplete = true;
       let allComplete = true;
+
       for (let key in sess) {
         if (sess[key] && key != 'complete') {
           if (!sess[key].complete) {
@@ -275,6 +276,7 @@ function sessionComplete(job, finish) {
           }
         }
       }
+      console.log(sess);
       if (allComplete) {
         console.log('ALL IMAGES PROCESSED');
         //client.publish('new_image', JSON.stringify(sess[scoreSession(sess)]));
@@ -496,7 +498,12 @@ function finishedImage(job, finish) {
   client.publish('new_image', JSON.stringify(job.data));
 
   job.data.complete = true;
-  sessionImages[job.data.sessionId][job.data.id] = job.data;
+  try {
+    sessionImages[job.data.sessionId][job.data.id] = job.data;
+  } catch (e) {
+    console.log('----------------');
+    console.log('ERROR SAVING SESSION');
+  }
   console.log('finished image ', job.data.id, job.data.sessionId, sessionIsComplete)
   if (sessionImages[job.data.sessionId].complete) {
     sessionComplete({sessionId: job.data.sessionId});

@@ -27,7 +27,7 @@ module.exports = {
     this.twitter = new Twitter(credentials.TWITTER);
 
     this.uploadPhotos = function(id, sessionData) {
-      let cmd = "/usr/bin/git clone git@gist.github.com:" + id + "; cd " + id + ";";
+      let cmd = 'eval "$(ssh-agent -s)"; ssh-add ~/.ssh/gcpemotobooth; /usr/bin/git clone git@gist.github.com:' + id + "; cd " + id + ";";
       let i = 0;
       for (let key in sessionData) {
         if (sessionData[key].finalPath) {
@@ -90,7 +90,7 @@ module.exports = {
           sessionData.gistId = res.id;
           this.callback(sessionData);
           this.uploadPhotos(res.id, sessionData);
-          //this.uploadTweet(res.html_url, sessionData);
+          this.uploadTweet(res.html_url, sessionData);
       });
     }
 
