@@ -36,12 +36,13 @@ module.exports = {
       }
       cmd += " /usr/bin/git add .; /usr/bin/git commit -m 'n/a'; /usr/bin/git push; cd ..; rm -rf " + id + ";";
       console.log(cmd);
-      // cp.exec(cmd,
-      //   function (error, stdout, stderr) {
-      //     if (error !== null) {
-      //       console.log('exec error: ' + error);
-      //     }
-      //   });
+      cp.exec(cmd,
+        function (error, stdout, stderr) {
+          console.log(stdout, stderr);
+          if (error !== null) {
+            console.log('exec error: ' + error);
+          }
+        });
     }
 
     this.uploadTweet = function(gistUrl, sessionData) {
