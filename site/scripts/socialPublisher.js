@@ -90,7 +90,7 @@ module.exports = {
           sessionData.gistId = res.id;
           this.callback(sessionData);
           this.uploadPhotos(res.id, sessionData);
-          this.uploadTweet(res.html_url, sessionData);
+          //this.uploadTweet(res.html_url, sessionData);
       });
     }
 
