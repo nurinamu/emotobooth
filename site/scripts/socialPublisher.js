@@ -27,9 +27,11 @@ module.exports = {
     this.twitter = new Twitter(credentials.TWITTER);
 
     this.uploadPhotos = function(id, sessionData) {
-      let cmd = "/usr/bin/git clone git@gist.github.com:" + id + "; cd " + id + ";";
+      console.log("upload photos!");
+      let cmd = "/usr/bin/git clone git@gist.github.com:" + id + ".git; cd " + id + ";";
       let i = 0;
       for (let key in sessionData) {
+        console.log("update test ["+key+"] : "+sessionData[key].finalPath);
         if (sessionData[key].finalPath) {
           cmd += " cp ../" + sessionData[key].finalPathChrome + " ./_photo" + (i++) + ".png;"
         }
@@ -49,7 +51,7 @@ module.exports = {
       this.twitter.post('media/upload', {media: photoData}, function(err, media, response){
         if (!err) {
           var status = {
-            status: 'Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ' + gistUrl,
+            status: 'GDG DevFest Seoul 2016에 참석해주셔서 감사합니다! #gdgkr #devfest #emotobooth 함께 찍은 다른 사진은 요기에서 →' + gistUrl,
             media_ids: media.media_id_string
           }
 
@@ -80,15 +82,20 @@ module.exports = {
       }
 
       this.github.gists.create({
-        'description': 'Google I/O photo session',
-        'public': false,
+        'description': 'GDG DevFest Seoul 2016 EmotoBooth',
+        'public': true,
         'files': files
       }, (err, res) => {
-          console.log('GIST CREATED AT: ' + res.id);
-          sessionData.gistId = res.id;
-          this.callback(sessionData);
-          this.uploadPhotos(res.id, sessionData);
-          this.uploadTweet(res.html_url, sessionData);
+          if(err) {
+            console.log(JSON.stringify(err));
+          } else {
+            console.log('GIST CREATED AT: ' + res.id);
+            sessionData.gistId = res.id;
+            this.callback(sessionData);
+            this.uploadPhotos(res.id, sessionData);
+            this.uploadTweet(res.html_url, sessionData);  
+          }
+          
       });
     }
 
@@ -97,6 +104,7 @@ module.exports = {
     }
 
     this.delete = function(gistId, tweetId) {
+      console.log("DELETE!!!");
       this.github.gists.delete({
         id: gistId
       }, (err, res) => {

@@ -38,6 +38,8 @@ logger.level = 'debug';
 // Parse args, read config, and configure
 var argv = require('minimist')(process.argv.slice(2));
 
+console.log("PHANTOMjs : "+phantomBinPath);
+
 try {
   var config = require('./config');
 } catch (e) {
@@ -81,9 +83,10 @@ client.hkeys("image-data", function (err, replies) {
     client.del('image-data', reply);
   });
 });
-
+var socialPublisher;
 if (CREDENTIALS) {
-  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+  socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+  console.log("CREDENTIALS are initialized");
 }
 
 // Define job mapping
@@ -293,7 +296,6 @@ function sessionComplete(job, finish) {
         //   }
         // }
         // if (argv.share) {
-        // //socialPublisher.share(sess);
         // }
         // sessionIsComplete = false;
       } else {
@@ -593,7 +595,8 @@ function processFinalImages(sess) {
           numberOfFaces = sess[key].faces;
         }
       }
-      if(sess[key].wasProcessed) {        
+      if(sess[key].wasProcessed) { 
+      console.log("score["+key+"] : "+sess[key].score);       
         if (sess[key].score <= 1) {
           let scoreNum = sess[key].score;
           scoredPhotos.push({key: key, score: scoreNum});
@@ -605,6 +608,7 @@ function processFinalImages(sess) {
       if (index < 4) {
         const imageName = `${ sess[photo.key].id }.jpg`
         const filePath = photostripPath + imageName;
+        console.log("createImage : "+filePath);
         photostripImages.push(imageName);
         fs.createReadStream(sess[photo.key].chromelessPath).pipe(fs.createWriteStream(filePath));
       }
@@ -622,9 +626,11 @@ function processFinalImages(sess) {
       runPhantomPhotoStrip(childArgs);
     }
 
-    // if (argv.share) {
-    //   socialPublisher.share(sess);
+    if (config.share) {
+      socialPublisher.share(sess);
+    }
     // } else {
+
     saveSession(sess);
     // }
     // sessionIsComplete = false;
@@ -638,10 +644,14 @@ function processFinalImages(sess) {
 
     sess[incompleteSession].wasProcessed++;
 
+    console.log("wasProcessed : "+sess[incompleteSession].wasProcessed);
+
     // logger.info(sprintf('Saving finished image: %s', out));
 
     var outJs = path.join(config.outDir, sprintf('%s.js', sess[incompleteSession].id));
     fs.writeFileSync(outJs, `newImage('${JSON.stringify(sess[incompleteSession])}')`)
+
+    //socialPublisher.share(sess);
 
     var childArgs = [
       path.join(__dirname, 'scripts/phantomChildProcess.js'),
@@ -680,7 +690,7 @@ function runPhantom(childArgs, incompleteSession) {
           //runPhantom(childArgs, incompleteSession);
         // }, 3000)
       } else {
-        console.log('completed');
+        console.log('completed');        
       }
       if (incompleteSession) {
         logger.info(sprintf('Saved finished image: %s', incompleteSession.finalPath));
