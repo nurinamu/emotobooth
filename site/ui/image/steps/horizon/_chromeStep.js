@@ -22,11 +22,11 @@ export default class ChromeStep {
 
     this.logoTop = 35;
     this.logoLeft = 40;
-    this.logoWidth = 60;
+    this.logoWidth = 150;
     this.logoHeight = 53;
 
     this.logo = new Image();
-    this.logo.src = assets.googleLogoSrc;
+    this.logo.src = assets.gdgLogoSrc;//assets.googleLogoSrc;
 
     this.chrome(duration);
   }

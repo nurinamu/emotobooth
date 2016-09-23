@@ -68,43 +68,43 @@ export default class JsonElement extends PanelComponent {
   }
 
   analyze(duration = 0) {
-    this.injectJSON(this.reqJson, duration / this.timeFactor, 'Analyzing');
+    this.injectJSON(this.reqJson, duration / this.timeFactor, '분석중...');
   }
 
   face(duration = 0) {
-    this.injectJSON(this.getFaceInfo(), duration / this.timeFactor, 'Face');
+    this.injectJSON(this.getFaceInfo(), duration / this.timeFactor, '얼굴(Face)');
   }
 
   ears(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EARS), duration / this.timeFactor, 'Ears');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EARS), duration / this.timeFactor, '귀(Ears)');
   }
 
   forehead(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FOREHEAD), duration / this.timeFactor, 'Forehead');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FOREHEAD), duration / this.timeFactor, '이마(Forehead)');
   }
 
   nose(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.NOSE), duration / this.timeFactor, 'Nose');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.NOSE), duration / this.timeFactor, '코(Nose)');
   }
 
   mouth(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.MOUTH), duration / this.timeFactor, 'Mouth');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.MOUTH), duration / this.timeFactor, '입(Mouth)');
   }
 
   chin(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.CHIN), duration / this.timeFactor, 'Chin');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.CHIN), duration / this.timeFactor, '턱(Chin)');
   }
 
   eyes(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EYES), duration / this.timeFactor, 'Eyes');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EYES), duration / this.timeFactor, '눈(Eyes)');
   }
 
   allFeatures(duration = 0) {
-    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FULL), duration / this.timeFactor, 'Face');
+    this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FULL), duration / this.timeFactor, '얼굴(Face)');
   }
 
   emotion(duration = 0) {
-    this.injectJSON([this.getEmotionInfo()], duration / this.timeFactor, 'Emotion', false, true);
+    this.injectJSON([this.getEmotionInfo()], duration / this.timeFactor, '감정(Emotion)', false, true);
   }
 
   complete(duration = 0) {
@@ -115,7 +115,7 @@ export default class JsonElement extends PanelComponent {
     this.injectJSON(
       json,
       duration / this.timeFactor,
-      'Processing Complete',
+      '처리 완료',
       true,
       true);
   }
